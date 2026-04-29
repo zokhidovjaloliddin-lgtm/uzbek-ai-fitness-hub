@@ -436,47 +436,6 @@ const AICoach = () => {
         </div>
       </div>
 
-      {/* WATCH MORE EDITS gallery modal */}
-      <AnimatePresence>
-        {galleryOpen && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] grid place-items-center bg-black/90 p-4"
-            onClick={() => setGalleryOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl border-2 border-primary bg-card shadow-crimson"
-            >
-              <div className="flex items-center justify-between border-b border-border p-4">
-                <div className="font-display text-2xl">{selectedArchetype.name} · Edits</div>
-                <button onClick={() => setGalleryOpen(false)} className="text-muted-foreground hover:text-crimson">
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
-                {selectedArchetype.gallery.map((id) => (
-                  <div key={id} className="aspect-video w-full overflow-hidden border-crimson-glow">
-                    <iframe
-                      className="h-full w-full"
-                      src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
-                      title={`${selectedArchetype.name} edit ${id}`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="border-t border-border p-4 text-right">
-                <button onClick={() => setGalleryOpen(false)} className="border border-border px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest hover:border-primary hover:text-crimson">
-                  {t("co_close")}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 };
