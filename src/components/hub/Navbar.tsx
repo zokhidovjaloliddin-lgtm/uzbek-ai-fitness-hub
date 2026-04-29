@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
+import { useLang } from "@/lib/i18n";
 
 const Navbar = () => {
+  const { lang, setLang, t } = useLang();
   const links = [
-    { href: "#analysis", label: "Body Analysis" },
-    { href: "#coach", label: "AI Coach" },
-    { href: "#pricing", label: "Pricing" },
+    { href: "#analysis", label: t("nav_analysis") },
+    { href: "#coach", label: t("nav_coach") },
+    { href: "#pricing", label: t("nav_pricing") },
   ];
   return (
     <motion.header
@@ -30,8 +32,22 @@ const Navbar = () => {
             </a>
           ))}
         </nav>
-        <div className="font-mono-tech text-xs text-muted-foreground">
-          TASHKENT · UZ
+        <div className="flex items-center gap-3">
+          <div className="hidden font-mono-tech text-xs text-muted-foreground sm:block">
+            TASHKENT · UZ
+          </div>
+          <div className="inline-flex items-center border border-border font-mono-tech text-[11px] uppercase tracking-widest">
+            <button
+              onClick={() => setLang("en")}
+              className={`px-2.5 py-1 transition ${lang === "en" ? "bg-crimson text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={lang === "en"}
+            >EN</button>
+            <button
+              onClick={() => setLang("uz")}
+              className={`px-2.5 py-1 transition ${lang === "uz" ? "bg-crimson text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={lang === "uz"}
+            >UZ</button>
+          </div>
         </div>
       </div>
     </motion.header>

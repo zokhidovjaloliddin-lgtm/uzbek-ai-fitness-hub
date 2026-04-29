@@ -4,6 +4,7 @@ import { Check, X, CreditCard, Loader2, ShieldCheck, Crown } from "lucide-react"
 import { storage } from "@/lib/storage";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
+import { useLang } from "@/lib/i18n";
 
 type Tier = {
   id: string;
@@ -78,6 +79,7 @@ const TIERS: Tier[] = [
  *   live without any page reload.
  */
 const Pricing = () => {
+  const { t } = useLang();
   // --- React state -------------------------------------------------
   const [activeTier, setActiveTier] = useState("standard");
   const [payTier, setPayTier] = useState<Tier | null>(null);
@@ -124,9 +126,9 @@ const Pricing = () => {
     <section id="pricing" className="border-b border-border py-24">
       <div className="container mx-auto">
         <SectionHeader
-          tag="03 / Pricing"
-          title={<>CHOOSE YOUR <span className="text-crimson">TIER.</span></>}
-          subtitle="Three paths. One destination — total dominion over the frame."
+          tag={t("pr_tag")}
+          title={<>{t("pr_title_1")} <span className="text-crimson">{t("pr_title_2")}</span></>}
+          subtitle={t("pr_sub")}
         />
 
         {/* Live account status — driven by React state, no refresh needed */}

@@ -39,7 +39,7 @@ const Footer = () => (
       </div>
 
       <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-border pt-6 font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground md:flex-row md:items-center">
-        <div>© 2026 Absolute_Frame · Front-End Development Project by: Jaloliddin Zoxidov | ID: 250040</div>
+        <div>© 2026 Absolute_Frame · Front-End Development Project | Jaloliddin Zoxidov | ID: 250040</div>
         <div className="flex items-center gap-2"><Code2 className="h-3.5 w-3.5" /> React · Tailwind · Framer Motion</div>
       </div>
     </div>

@@ -1,19 +1,42 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Loader2, Settings, Sparkles, Trash2, Copy } from "lucide-react";
+import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, RotateCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { storage } from "@/lib/storage";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
+import { useLang } from "@/lib/i18n";
 
 const ARCHETYPES = [
-  { id: "kratos", name: "Kratos", tag: "God of War", desc: "Brutal strength, no mercy." },
-  { id: "yujiro", name: "Yujiro Hanma", tag: "The Ogre", desc: "Raw primal violence." },
-  { id: "wukong", name: "Sun Wukong", tag: "Monkey King", desc: "Agility, mischief, infinite stamina." },
-  { id: "spartan", name: "Spartan", tag: "300", desc: "Phalanx discipline." },
-  { id: "musashi", name: "Miyamoto Musashi", tag: "Sword Saint", desc: "Calm mind, lethal body." },
-  { id: "alpamish", name: "Alpamish", tag: "Uzbek Bahodir", desc: "Steppe warrior endurance." },
+  {
+    id: "kratos",
+    name: "Kratos",
+    tag: "God of War",
+    desc: "Brutal strength, no mercy.",
+    image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapercave.com%2Fwp%2Fwp2683901.jpg&f=1&ipt=1e1140cde3162f8e8c5ff047f8cdbb22d14011c36a499f035d4fb8d2f6061f22",
+  },
+  {
+    id: "yujiro",
+    name: "Yujiro Hanma",
+    tag: "The Ogre",
+    desc: "Raw primal violence.",
+    image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperbat.com%2Fimg%2F803104-yujiro-hanma-wallpaper-discover-more-anime-baki-the-grappler-grappler-baki-manga-yujiro-wallpaper-anime-artwork-wallpaper-western-anime-sky-anime.jpg&f=1&ipt=67233f8845dcd1907b78f74b66e2c78d05c72f45fea8949f23d63930aa90f5eb",
+  },
+  {
+    id: "khabib",
+    name: "Khabib Nurmagomedov",
+    tag: "The Eagle",
+    desc: "Dagestani grappling, unbreakable will.",
+    image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmrwallpaper.com%2Fimages%2Fhd%2Fkhabib-nurmagomedov-grappling-ar25l6ya1tq8f7rf.jpg&f=1&ipt=41db277f3f63eea0df018480d6a0f7874a5eb0a8856a64042f2ce0d56b48282b",
+  },
+  {
+    id: "khamzat",
+    name: "Khamzat Chimaev",
+    tag: "Borz",
+    desc: "Smesh mode. Relentless pressure.",
+    image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fheavy.com%2Fwp-content%2Fuploads%2F2023%2F01%2FGettyImages-1390588421-e1672814533816.jpg%3Fquality%3D65%26strip%3Dall%26w%3D780&f=1&ipt=ea4faed572ebc64d36800da11c453fcffcffa05afa6648adea6a1d33b7c825db",
+  },
 ];
 
 const GOALS = ["Strength", "Hypertrophy", "Calisthenics Mastery", "Fat Loss", "Endurance"];
@@ -34,12 +57,14 @@ const LEVELS = ["Beginner", "Intermediate", "Advanced"];
  *   user through `sonner` toasts.
  */
 const AICoach = () => {
+  const { t } = useLang();
   // --- React state -------------------------------------------------
   const [archetype, setArchetype] = useState("kratos");
   const [goal, setGoal] = useState("Calisthenics Mastery");
   const [level, setLevel] = useState("Intermediate");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<string>("");
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
   // Restore the last generated plan on mount so refresh doesn't wipe it.
   useEffect(() => {
@@ -56,6 +81,7 @@ const AICoach = () => {
   const generate = async () => {
     setLoading(true);
     setPlan("");
+    setErrorMsg("");
     try {
       const { data, error } = await supabase.functions.invoke("generate-workout", {
         body: { archetype: ARCHETYPES.find(a => a.id === archetype)?.name, goal, level },
@@ -71,6 +97,7 @@ const AICoach = () => {
       toast.success("Protocol forged. Moshshniy!");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Unknown error";
+      setErrorMsg(msg);
       toast.error(`Coach offline: ${msg}`);
     } finally {
       setLoading(false);
@@ -98,9 +125,9 @@ const AICoach = () => {
     <section id="coach" className="border-b border-border py-24">
       <div className="container mx-auto">
         <SectionHeader
-          tag="02 / Primordial AI Coach"
-          title={<>SUMMON YOUR <span className="text-crimson">ARCHETYPE.</span></>}
-          subtitle="Gemini-powered protocol generator. Speaks Uzbek-English slang. Knows the Tashkent calisthenics circuit."
+          tag={t("co_tag")}
+          title={<>{t("co_title_1")} <span className="text-crimson">{t("co_title_2")}</span></>}
+          subtitle={t("co_sub")}
         />
 
         <div className="grid gap-px border-frame bg-border lg:grid-cols-[380px_1fr]">
@@ -117,10 +144,21 @@ const AICoach = () => {
                   <button
                     key={a.id}
                     onClick={() => setArchetype(a.id)}
-                    className={`border p-3 text-left transition ${archetype === a.id ? "border-primary bg-primary/10 shadow-crimson" : "border-border hover:border-muted-foreground"}`}
+                    className={`group overflow-hidden border-2 text-left transition ${archetype === a.id ? "border-primary shadow-crimson" : "border-border hover:border-primary/60"}`}
                   >
-                    <div className="font-display text-lg">{a.name}</div>
-                    <div className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">{a.tag}</div>
+                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
+                      <img
+                        src={a.image}
+                        alt={`${a.name} — ${a.tag}`}
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                    </div>
+                    <div className="p-2.5">
+                      <div className="font-display text-base leading-tight">{a.name}</div>
+                      <div className="font-mono-tech text-[10px] uppercase tracking-widest text-crimson">{a.tag}</div>
+                    </div>
                   </button>
                 ))}
               </div>
@@ -155,7 +193,7 @@ const AICoach = () => {
               disabled={loading}
               className="mt-8 inline-flex w-full items-center justify-center gap-2 bg-crimson px-6 py-4 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground transition hover:bg-primary-glow disabled:opacity-50"
             >
-              {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Forging...</> : <><Sparkles className="h-4 w-4" /> Generate Protocol</>}
+              {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Forging...</> : <><Sparkles className="h-4 w-4" /> {t("co_generate")}</>}
             </button>
 
             {plan && (
@@ -195,7 +233,33 @@ const AICoach = () => {
                 </motion.div>
               )}
 
-              {!loading && !plan && (
+              {!loading && errorMsg && (
+                <motion.div key="error" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  className="flex h-[400px] flex-col items-center justify-center">
+                  <div className="w-full max-w-md border-2 border-primary bg-primary/10 p-6 shadow-crimson">
+                    <div className="flex items-center gap-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson">
+                      <AlertTriangle className="h-4 w-4" /> System Failure
+                    </div>
+                    <div className="mt-3 font-display text-2xl text-foreground">
+                      Xatolik: Coach Offline.
+                    </div>
+                    <div className="mt-1 font-mono-tech text-sm text-muted-foreground">
+                      Aka, internetni tekshiring!
+                    </div>
+                    <div className="mt-3 break-words border-t border-primary/40 pt-3 font-mono-tech text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {errorMsg}
+                    </div>
+                    <button
+                      onClick={generate}
+                      className="mt-5 inline-flex w-full items-center justify-center gap-2 bg-crimson px-6 py-3 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground transition hover:bg-primary-glow"
+                    >
+                      <RotateCw className="h-4 w-4" /> {t("co_try_again")}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {!loading && !errorMsg && !plan && (
                 <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="flex h-[400px] flex-col items-center justify-center gap-3 text-center">
                   <div className="font-display text-4xl text-stroke">AWAITING SUMMON</div>
@@ -205,7 +269,7 @@ const AICoach = () => {
                 </motion.div>
               )}
 
-              {!loading && plan && (
+              {!loading && !errorMsg && plan && (
                 <motion.article key="plan"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
