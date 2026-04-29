@@ -1,6 +1,7 @@
 const KEY_BMI = "absolute_frame_bmi";
 const KEY_PLAN = "absolute_frame_plan";
 const KEY_TIER = "absolute_frame_tier";
+const KEY_SUBS = "absolute_frame_subs";
 
 export type BmiRecord = {
   height: number;
@@ -32,6 +33,18 @@ export const storage = {
     return localStorage.getItem(KEY_TIER) ?? "standard";
   },
   setTier(t: string) { localStorage.setItem(KEY_TIER, t); },
+
+  /** Set of tier ids the user has actively subscribed to (paid). */
+  getSubs(): string[] {
+    try { const raw = localStorage.getItem(KEY_SUBS); return raw ? JSON.parse(raw) : []; } catch { return []; }
+  },
+  addSub(id: string) {
+    const cur = storage.getSubs();
+    if (!cur.includes(id)) {
+      cur.push(id);
+      localStorage.setItem(KEY_SUBS, JSON.stringify(cur));
+    }
+  },
 };
 
 export function classifyBmi(bmi: number) {

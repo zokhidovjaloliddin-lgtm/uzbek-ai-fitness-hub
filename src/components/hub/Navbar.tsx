@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flame } from "lucide-react";
+import { Flame, Mail } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 
 const Navbar = () => {
@@ -14,7 +14,7 @@ const Navbar = () => {
       initial={{ y: -40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md"
+      className="sticky top-0 z-50 border-b-2 border-primary/30 bg-background/90 backdrop-blur-md"
     >
       <div className="container mx-auto flex items-center justify-between py-4">
         <a href="#top" className="flex items-center gap-2">
@@ -22,20 +22,25 @@ const Navbar = () => {
             <Flame className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="font-display text-2xl tracking-wider">
-            ABSOLUTE<span className="text-crimson">_</span>FRAME
+            <span className="glitch" data-text="ABSOLUTE_FRAME">
+              ABSOLUTE<span className="text-crimson">_</span>FRAME
+            </span>
           </div>
         </a>
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           {links.map(l => (
             <a key={l.href} href={l.href} className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground transition hover:text-foreground">
               {l.label}
             </a>
           ))}
+          <a
+            href="mailto:jaloliddinzokhidov@gmail.com"
+            className="inline-flex items-center gap-1.5 border border-primary px-3 py-1.5 font-mono-tech text-[11px] uppercase tracking-widest text-crimson transition hover:bg-crimson hover:text-primary-foreground"
+          >
+            <Mail className="h-3.5 w-3.5" /> {t("nav_contact")}
+          </a>
         </nav>
         <div className="flex items-center gap-3">
-          <div className="hidden font-mono-tech text-xs text-muted-foreground sm:block">
-            TASHKENT · UZ
-          </div>
           <div className="inline-flex items-center border border-border font-mono-tech text-[11px] uppercase tracking-widest">
             <button
               onClick={() => setLang("en")}

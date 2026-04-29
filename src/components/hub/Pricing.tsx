@@ -69,48 +69,56 @@ const TIERS: Tier[] = [
  * ------------------------------------------------------------------
  * Front-End Development Project — Jaloliddin Zoxidov (ID: 250040)
  *
- * - useState: drives the active subscription tier, the modal target,
- *   the multi-step payment status, and the chosen payment method.
- * - useEffect: reads the persisted tier from localStorage on mount so
- *   the "PREMIUM" badge survives page refreshes.
+ * - useState: drives the active tier, the modal, the multi-step
+ *   payment status, the chosen payment method, AND the persisted
+ *   array of subscribed tier ids ("subs").
+ * - useEffect: hydrates both the active tier AND the subs array from
+ *   localStorage on mount, so the "✓ FAOL REJA" badge survives any
+ *   page refresh.
  * - The Payme/Click confirmation flow is fully client-side: when the
- *   user clicks "Confirm Payment", React state transitions
- *   idle → processing → done, and the Account Status pill updates
- *   live without any page reload.
+ *   user clicks "Confirm Payment", the chosen tier is added to the
+ *   subs array, persisted, and the card immediately switches to the
+ *   disabled "Active Plan" state without a page reload.
  */
 const Pricing = () => {
   const { t } = useLang();
   // --- React state -------------------------------------------------
   const [activeTier, setActiveTier] = useState("standard");
+  const [subs, setSubs] = useState<string[]>([]);
   const [payTier, setPayTier] = useState<Tier | null>(null);
   const [paying, setPaying] = useState<"idle" | "processing" | "done">("idle");
   const [method, setMethod] = useState<"payme" | "click">("payme");
 
-  // Restore last subscription tier from localStorage on first render.
-  useEffect(() => { setActiveTier(storage.getTier()); }, []);
+  // Restore last subscription tier + subscribed list from localStorage.
+  useEffect(() => {
+    setActiveTier(storage.getTier());
+    setSubs(storage.getSubs());
+  }, []);
 
-  // Friendly label for the live Account Status pill.
   const accountLabel = (activeTier ?? "standard").toUpperCase();
 
-  const choose = (t: Tier) => {
-    if (t.free) {
-      storage.setTier(t.id);
-      setActiveTier(t.id);
-      toast.success(`${t.name} activated.`);
+  const choose = (tier: Tier) => {
+    if (subs.includes(tier.id) || (tier.free && activeTier === tier.id)) return;
+    if (tier.free) {
+      storage.setTier(tier.id);
+      setActiveTier(tier.id);
+      toast.success(`${tier.name} activated.`);
       return;
     }
-    setPayTier(t);
+    setPayTier(tier);
     setPaying("idle");
   };
 
-  // Simulated Payme/Click checkout. Updates React state in place so
-  // the UI reflects the new "PREMIUM" status without a page refresh.
+  // Simulated Payme/Click checkout. Persists the subscribed tier so
+  // the "✓ FAOL REJA" badge survives a refresh.
   const confirmPay = () => {
     setPaying("processing");
     setTimeout(() => {
       if (payTier) {
         storage.setTier(payTier.id);
-        setActiveTier(payTier.id); // ← live UI update, no reload
+        storage.addSub(payTier.id);
+        setActiveTier(payTier.id);
+        setSubs((prev) => prev.includes(payTier.id) ? prev : [...prev, payTier.id]);
         toast.success(`Account Status: ${payTier.id.toUpperCase()}`);
       }
       setPaying("done");
@@ -123,7 +131,7 @@ const Pricing = () => {
   };
 
   return (
-    <section id="pricing" className="border-b border-border py-24">
+    <section id="pricing" className="border-b border-border bg-noir py-24">
       <div className="container mx-auto">
         <SectionHeader
           tag={t("pr_tag")}
@@ -131,84 +139,98 @@ const Pricing = () => {
           subtitle={t("pr_sub")}
         />
 
-        {/* Live account status — driven by React state, no refresh needed */}
         <div className="mb-8 flex justify-center">
           <div className={`inline-flex items-center gap-2 border px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest ${
             activeTier === "standard"
               ? "border-border text-muted-foreground"
               : "border-primary text-crimson shadow-crimson"
           }`}>
-            <Crown className="h-3.5 w-3.5" /> Account Status: <span className="text-foreground">{accountLabel}</span>
+            <Crown className="h-3.5 w-3.5" /> {t("pr_status")}: <span className="text-foreground">{accountLabel}</span>
           </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {TIERS.map((t, i) => (
-            <motion.div
-              key={t.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className={`relative flex flex-col border bg-card p-8 ${t.highlighted ? "border-primary shadow-deep" : "border-border"}`}
-            >
-              {t.highlighted && (
-                <div className="absolute -top-3 left-8 bg-crimson px-3 py-1 font-mono-tech text-[10px] uppercase tracking-widest text-primary-foreground">
-                  Most Chosen
-                </div>
-              )}
-              {activeTier === t.id && (
-                <div className="absolute right-4 top-4 inline-flex items-center gap-1 border border-gauge-normal px-2 py-0.5 font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">
-                  <ShieldCheck className="h-3 w-3" /> Active
-                </div>
-              )}
-              <div className="font-display text-3xl">{t.name}</div>
-              <div className="mt-1 font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">{t.tagline}</div>
-
-              <div className="mt-6 flex items-baseline gap-2">
-                <div className="font-display text-6xl text-crimson">{t.price}</div>
-                <div className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">{t.priceLabel}</div>
-              </div>
-
-              <ul className="mt-8 flex-1 space-y-3">
-                {t.features.map(f => (
-                  <li key={f.text} className="flex items-start gap-3 text-sm">
-                    {f.ok
-                      ? <Check className="mt-0.5 h-4 w-4 text-crimson" />
-                      : <X className="mt-0.5 h-4 w-4 text-muted-foreground/50" />}
-                    <span className={f.ok ? "text-foreground" : "text-muted-foreground/50 line-through"}>{f.text}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() => choose(t)}
-                className={`mt-8 w-full px-6 py-4 font-mono-tech text-xs uppercase tracking-widest transition ${
-                  t.highlighted
-                    ? "bg-crimson text-primary-foreground hover:bg-primary-glow"
-                    : "border border-border hover:border-primary hover:text-crimson"
+          {TIERS.map((tier, i) => {
+            const isSubscribed = subs.includes(tier.id);
+            const isActiveFree = tier.free && activeTier === tier.id;
+            const locked = isSubscribed || isActiveFree;
+            return (
+              <motion.div
+                key={tier.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className={`relative flex flex-col border-2 bg-card p-8 ${
+                  isSubscribed ? "border-primary shadow-crimson"
+                    : tier.highlighted ? "border-primary shadow-deep"
+                    : "border-border"
                 }`}
               >
-                {t.free ? "Activate Free" : `Subscribe — ${t.price} UZS`}
-              </button>
-            </motion.div>
-          ))}
+                {tier.highlighted && !isSubscribed && (
+                  <div className="absolute -top-3 left-8 bg-crimson px-3 py-1 font-mono-tech text-[10px] uppercase tracking-widest text-primary-foreground">
+                    {t("pr_most")}
+                  </div>
+                )}
+                {locked && (
+                  <div className="absolute right-4 top-4 inline-flex items-center gap-1 border border-gauge-normal px-2 py-0.5 font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">
+                    <ShieldCheck className="h-3 w-3" /> Active
+                  </div>
+                )}
+                <div className="font-display text-3xl">{tier.name}</div>
+                <div className="mt-1 font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">{tier.tagline}</div>
+
+                <div className="mt-6 flex items-baseline gap-2">
+                  <div className="font-display text-6xl text-crimson">{tier.price}</div>
+                  <div className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">{tier.priceLabel}</div>
+                </div>
+
+                <ul className="mt-8 flex-1 space-y-3">
+                  {tier.features.map(f => (
+                    <li key={f.text} className="flex items-start gap-3 text-sm">
+                      {f.ok
+                        ? <Check className="mt-0.5 h-4 w-4 text-crimson" />
+                        : <X className="mt-0.5 h-4 w-4 text-muted-foreground/50" />}
+                      <span className={f.ok ? "text-foreground" : "text-muted-foreground/50 line-through"}>{f.text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => choose(tier)}
+                  disabled={locked}
+                  className={`mt-8 w-full px-6 py-4 font-mono-tech text-xs uppercase tracking-widest transition ${
+                    locked
+                      ? "cursor-not-allowed border-2 border-gauge-normal bg-gauge-normal/10 text-gauge-normal"
+                      : tier.highlighted
+                        ? "bg-crimson text-primary-foreground hover:bg-primary-glow"
+                        : "border border-border hover:border-primary hover:text-crimson"
+                  }`}
+                >
+                  {locked
+                    ? t("pr_active")
+                    : tier.free
+                      ? t("pr_activate_free")
+                      : `${t("pr_subscribe")} — ${tier.price} UZS`}
+                </button>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Payment modal */}
       <AnimatePresence>
         {payTier && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] grid place-items-center bg-black/80 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[100] grid place-items-center bg-black/85 backdrop-blur-sm p-4"
             onClick={closeModal}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
               transition={{ type: "spring", stiffness: 200, damping: 22 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-md border border-primary bg-card shadow-crimson"
+              className="relative w-full max-w-md border-2 border-primary bg-card shadow-crimson"
             >
               <div className="border-b border-border bg-background/50 p-6">
                 <div className="font-mono-tech text-[10px] uppercase tracking-widest text-crimson">Secure Checkout</div>

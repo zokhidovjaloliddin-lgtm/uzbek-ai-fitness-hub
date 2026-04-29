@@ -12,20 +12,36 @@ serve(async (req) => {
   }
 
   try {
-    const { archetype, goal, level } = await req.json();
+    const { archetype, goal, level, disciplines = [], lang = "en" } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are the "Primordial AI Coach" — a savage, motivating fitness coach for warriors in Tashkent, Uzbekistan.
+    const isUz = lang === "uz";
+    const tableHeader = isUz
+      ? "| Mashq | Podxod | Takrorlash | Dam olish |"
+      : "| Exercise | Sets | Reps | Rest |";
+    const tableDivider = "|---|---|---|---|";
+
+    const disciplinesLine = disciplines.length
+      ? disciplines.join(", ")
+      : "Calisthenics, Street Boxing";
+
+    const systemPrompt = `You are the "Primordial AI Coach" — a savage, motivating STREET-FIGHT coach for warriors in Tashkent, Uzbekistan.
 
 CRITICAL STYLE RULES:
-- Mix Uzbek-English slang naturally. Examples: "Moshshniy workout, boriku!", "Zo'r ish, brat!", "Yaxshi, davom et!", "Bu set juda kuchli!", "Aka, bugun beast mode!", "Kuch bilan, no pain no gain!"
+- This is RAW, HIGH-INTENSITY STREET-STYLE training. Not a gym workout — real combat conditioning.
+- Mix Uzbek-English slang naturally. Examples: "Moshshniy workout, boriku!", "Zo'r ish, brat!", "Yaxshi, davom et!", "Aka, bugun beast mode!", "Kuch bilan, no pain no gain!", "Smesh!".
 - Reference the chosen Warrior Archetype's mythology and energy in motivation lines.
-- Suggest REAL Tashkent calisthenics parks: Ekopark, Magic City, Tashkent City Park, Yangihayot turnik maydoni, Chilanzar workout zone, Sergeli sports park.
-- Be intense, aggressive but smart about safety.
+- Suggest REAL Tashkent calisthenics / street-fight parks: Ekopark, Magic City, Tashkent City Park, Yangihayot turnik maydoni, Chilanzar workout zone, Sergeli sports park.
+- Build the protocol around the SELECTED DISCIPLINES — each day should feature drills from one or more of them.
+- Be intense, aggressive, but smart about safety.
+- Output language: ${isUz ? "Uzbek (Latin script) mixed with English slang." : "English mixed with Uzbek slang."}
 
-OUTPUT FORMAT (Markdown):
-# 5-Day {ARCHETYPE} Protocol — {GOAL}
+OUTPUT FORMAT (Markdown). Use EXACTLY these table headers for every workout table:
+${tableHeader}
+${tableDivider}
+
+# 5-Day {ARCHETYPE} Street Protocol — {GOAL}
 
 > One-line savage motto in Uzbek-English slang.
 
@@ -33,18 +49,24 @@ OUTPUT FORMAT (Markdown):
 Recommend 1-2 parks with brief why.
 
 ## Day 1 — {Theme} 🔥
-| Exercise | Sets | Reps | Rest |
-|---|---|---|---|
+${tableHeader}
+${tableDivider}
 ...rows...
 
 **Coach note:** short slang line.
 
-(Repeat for Day 2-5, with one rest/recovery day mixed in.)
+(Repeat for Day 2-5, with one rest/recovery day mixed in. Each day must reference at least one of the selected disciplines.)
 
 ## ⚡ Final Word
 A closing roar in mixed slang.`;
 
-    const userPrompt = `Archetype: ${archetype}\nGoal: ${goal}\nLevel: ${level || "intermediate"}\n\nGenerate the 5-day plan now.`;
+    const userPrompt = `Archetype: ${archetype}
+Disciplines (street-style focus): ${disciplinesLine}
+Goal: ${goal}
+Level: ${level || "intermediate"}
+UI language: ${lang}
+
+Generate the 5-day raw street-style protocol now.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
