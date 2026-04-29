@@ -76,8 +76,8 @@ const BodyAnalysis = () => {
         <div className="grid gap-px border-frame bg-border lg:grid-cols-2">
           <div className="bg-card p-8 md:p-12">
             <div className="space-y-6">
-              <Field icon={<Ruler className="h-4 w-4" />} label="Height (cm)" value={height} onChange={setHeight} placeholder="178" />
-              <Field icon={<Weight className="h-4 w-4" />} label="Weight (kg)" value={weight} onChange={setWeight} placeholder="72" />
+              <Field icon={<Ruler className="h-4 w-4" />} label={t("ba_height")} value={height} onChange={setHeight} placeholder="178" />
+              <Field icon={<Weight className="h-4 w-4" />} label={t("ba_weight")} value={weight} onChange={setWeight} placeholder="72" />
 
               <button
                 onClick={onSave}
@@ -90,7 +90,7 @@ const BodyAnalysis = () => {
           </div>
 
           <div className="relative bg-card p-8 md:p-12 corner-frame">
-            <div className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">Result Index</div>
+            <div className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">{t("ba_result")}</div>
             <div className="mt-2 flex items-end gap-4">
               <motion.div
                 key={bmi}
@@ -104,7 +104,7 @@ const BodyAnalysis = () => {
             </div>
 
             <div className={`mt-3 inline-flex items-center gap-2 border px-3 py-1 font-mono-tech text-xs uppercase tracking-widest ${cls ? colorClasses[cls.color] : "border-border text-muted-foreground"}`}>
-              <Activity className="h-3.5 w-3.5" /> {cls?.label ?? "Awaiting input"}
+              <Activity className="h-3.5 w-3.5" /> {cls?.label ?? t("ba_awaiting")}
             </div>
 
             <div className="mt-2 font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -129,17 +129,17 @@ const BodyAnalysis = () => {
                 )}
               </div>
               <div className="mt-2 grid grid-cols-4 gap-1 font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">
-                <span>Under</span>
-                <span>Normal</span>
-                <span>Over</span>
-                <span>Obese</span>
+                <span>{t("ba_under")}</span>
+                <span>{t("ba_normal")}</span>
+                <span>{t("ba_over")}</span>
+                <span>{t("ba_obese")}</span>
               </div>
             </div>
 
             <div className="mt-10 border-t border-border pt-6 font-mono-tech text-xs text-muted-foreground">
-              <div className="flex justify-between"><span>Height</span><span className="text-foreground">{height || "—"} cm</span></div>
-              <div className="mt-1 flex justify-between"><span>Weight</span><span className="text-foreground">{weight || "—"} kg</span></div>
-              <div className="mt-1 flex justify-between"><span>Persisted</span><span className="text-foreground">localStorage ✓</span></div>
+              <div className="flex justify-between"><span>{t("ba_height")}</span><span className="text-foreground">{height || "—"} cm</span></div>
+              <div className="mt-1 flex justify-between"><span>{t("ba_weight")}</span><span className="text-foreground">{weight || "—"} kg</span></div>
+              <div className="mt-1 flex justify-between"><span>{t("ba_persisted")}</span><span className="text-foreground">localStorage ✓</span></div>
             </div>
           </div>
         </div>

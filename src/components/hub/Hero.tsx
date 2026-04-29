@@ -37,7 +37,7 @@ const Hero = () => {
           className="mt-8 max-w-xl text-lg text-muted-foreground"
         >
           {t("hero_sub")}
-          <span className="block mt-2 font-mono-tech text-sm text-foreground">Boriku, brat. Beast mode aktivatsiya.</span>
+          <span className="block mt-2 font-mono-tech text-sm text-foreground">{t("hero_tagline")}</span>
         </motion.p>
 
         <motion.div
@@ -62,10 +62,10 @@ const Hero = () => {
           className="mt-20 grid grid-cols-2 gap-px border-frame bg-border md:grid-cols-4"
         >
           {[
-            ["05", "Day Protocol"],
-            ["04", "Warrior Archetypes"],
-            ["12+", "Tashkent Parks"],
-            ["∞", "Mind Reps"],
+            ["05", t("hero_stat_1")],
+            ["04", t("hero_stat_2")],
+            ["12+", t("hero_stat_3")],
+            ["∞", t("hero_stat_4")],
           ].map(([n, l]) => (
             <div key={l} className="bg-background p-6">
               <div className="font-display text-5xl text-crimson">{n}</div>
