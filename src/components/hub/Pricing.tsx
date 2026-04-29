@@ -208,7 +208,11 @@ const Pricing = () => {
                   }`}
                 >
                   {locked
-                    ? t("pr_active")
+                    ? (tier.id === "ultra"
+                        ? t("pr_already_elite")
+                        : tier.id === "premium"
+                          ? t("pr_already_pro")
+                          : t("pr_already_free"))
                     : tier.free
                       ? t("pr_activate_free")
                       : `${t("pr_subscribe")} — ${tier.price} UZS`}
