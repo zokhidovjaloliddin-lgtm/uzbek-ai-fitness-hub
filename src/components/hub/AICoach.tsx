@@ -338,45 +338,6 @@ const AICoach = () => {
             </div>
 
             {/* MISSION BRIEFING GATE */}
-            <div className="mt-8 border-2 border-primary bg-noir p-4 shadow-crimson">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson">
-                  <Video className="h-3.5 w-3.5" /> {t("co_briefing")}
-                </div>
-                {briefingWatched && (
-                  <div className="font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">● {t("co_unlocked")}</div>
-                )}
-              </div>
-              <div className="mt-1 font-mono-tech text-[10px] text-muted-foreground">{t("co_briefing_sub")}</div>
-
-              <div
-                onClick={() => setBriefingWatched(true)}
-                className="relative mt-3 aspect-video w-full overflow-hidden border-crimson-glow cursor-pointer"
-              >
-                <iframe
-                  className="absolute inset-0 h-full w-full"
-                  src={`https://www.youtube.com/embed/${activeVideo}?rel=0&modestbranding=1`}
-                  title={`${selectedArchetype.name} briefing`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-              {!briefingWatched && (
-                <div className="mt-2 font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">
-                  {t("co_unlock_hint")}
-                </div>
-              )}
-
-              {briefingWatched && selectedArchetype.gallery.length > 0 && (
-                <button
-                  onClick={() => setGalleryOpen(true)}
-                  className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-primary px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson transition hover:bg-primary hover:text-primary-foreground"
-                >
-                  <Play className="h-3.5 w-3.5" /> {t("co_more_edits")} · {selectedArchetype.name}
-                </button>
-              )}
-            </div>
-
             <button
               onClick={generate}
               disabled={loading || !briefingWatched}
