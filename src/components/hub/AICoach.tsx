@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, RotateCw, Lock, Play, ChevronDown, ChevronUp, Video, CheckCircle2 } from "lucide-react";
+import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, RotateCw, Lock, Play, ChevronDown, ChevronUp, Video, CheckCircle2, Crown, Mail } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
-import { storage } from "@/lib/storage";
+import { storage, getActiveTier } from "@/lib/storage";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
 import { useLang, T } from "@/lib/i18n";
@@ -14,6 +14,7 @@ const ARCHETYPES = [
     name: "Kratos",
     tag: "God of War",
     desc: "Brutal strength, no mercy.",
+    phrase: "ph_kratos" as const,
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapercave.com%2Fwp%2Fwp2683901.jpg&f=1&ipt=1e1140cde3162f8e8c5ff047f8cdbb22d14011c36a499f035d4fb8d2f6061f22",
     primary: "aPxjmVY8mQg",
     gallery: ["DoLknLWDpwY", "e4NK6lc5mDA"],
@@ -23,6 +24,7 @@ const ARCHETYPES = [
     name: "Yujiro Hanma",
     tag: "The Ogre",
     desc: "Raw primal violence.",
+    phrase: "ph_yujiro" as const,
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperbat.com%2Fimg%2F803104-yujiro-hanma-wallpaper-discover-more-anime-baki-the-grappler-grappler-baki-manga-yujiro-wallpaper-anime-artwork-wallpaper-western-anime-sky-anime.jpg&f=1&ipt=67233f8845dcd1907b78f74b66e2c78d05c72f45fea8949f23d63930aa90f5eb",
     primary: "iGo6MiBrHGg",
     gallery: ["nmin3eOO_DA", "XfWnc97PQW4"],
@@ -32,6 +34,7 @@ const ARCHETYPES = [
     name: "Khabib Nurmagomedov",
     tag: "The Eagle",
     desc: "Dagestani grappling, unbreakable will.",
+    phrase: "ph_khabib" as const,
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmrwallpaper.com%2Fimages%2Fhd%2Fkhabib-nurmagomedov-grappling-ar25l6ya1tq8f7rf.jpg&f=1&ipt=41db277f3f63eea0df018480d6a0f7874a5eb0a8856a64042f2ce0d56b48282b",
     primary: "wPonsvTJNnU",
     gallery: ["ViJC105vG-s", "qijolcTZoCs"],
@@ -41,6 +44,7 @@ const ARCHETYPES = [
     name: "Khamzat Chimaev",
     tag: "Borz",
     desc: "Smesh mode. Relentless pressure.",
+    phrase: "ph_khamzat" as const,
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fheavy.com%2Fwp-content%2Fuploads%2F2023%2F01%2FGettyImages-1390588421-e1672814533816.jpg%3Fquality%3D65%26strip%3Dall%26w%3D780&f=1&ipt=ea4faed572ebc64d36800da11c453fcffcffa05afa6648adea6a1d33b7c825db",
     primary: "3oSQDXXnXAs",
     gallery: ["7GKN1U0ZVd4", "oKn8reI-ojk"],
@@ -76,9 +80,28 @@ const LEVELS = ["Beginner", "Intermediate", "Advanced"];
  */
 const AICoach = () => {
   const { t, lang } = useLang();
+  // --- Tier logic --------------------------------------------------
+  // Read the user's highest active tier from LocalStorage. This drives
+  // ALL the gating below: discipline cap, briefing video, gallery,
+  // exercise count, table styling, and direct-coach contact.
+  const [tier, setTier] = useState<"standard" | "premium" | "ultra">("standard");
+  useEffect(() => {
+    setTier(getActiveTier());
+    // Re-check whenever LocalStorage changes (e.g. user just paid).
+    const onStorage = () => setTier(getActiveTier());
+    window.addEventListener("storage", onStorage);
+    // Also poll briefly so a same-tab subscribe is reflected.
+    const iv = window.setInterval(() => setTier(getActiveTier()), 1500);
+    return () => { window.removeEventListener("storage", onStorage); window.clearInterval(iv); };
+  }, []);
+
+  const maxDisciplines = tier === "ultra" ? 5 : tier === "premium" ? 3 : 1;
+  const briefingEnabled = tier !== "standard";
+  const galleryEnabled = tier === "ultra";
+
   // --- React state -------------------------------------------------
   const [archetype, setArchetype] = useState("kratos");
-  const [disciplines, setDisciplines] = useState<string[]>(["calisthenics", "boxing"]);
+  const [disciplines, setDisciplines] = useState<string[]>(["calisthenics"]);
   const [goal, setGoal] = useState("Calisthenics Mastery");
   const [level, setLevel] = useState("Intermediate");
   const [loading, setLoading] = useState(false);
@@ -119,11 +142,20 @@ const AICoach = () => {
     }
   }, []);
 
+  // Trim disciplines if the user's tier cap shrinks (e.g. downgrade).
+  useEffect(() => {
+    setDisciplines((cur) => cur.slice(0, maxDisciplines));
+  }, [maxDisciplines]);
+
   const toggleDiscipline = (id: string) => {
     setDisciplines((cur) => {
       if (cur.includes(id)) return cur.filter(x => x !== id);
-      if (cur.length >= 5) {
-        toast.error("Max 5 disciplines.");
+      if (cur.length >= maxDisciplines) {
+        if (tier === "standard") {
+          toast.error("Free plan: faqat 1 ta discipline. Pro'ga o'tib ko'p tanlang.");
+          return [id]; // Free plan = single-select swap
+        }
+        toast.error(`${tier === "premium" ? "Pro" : "Ultra"} cap: max ${maxDisciplines} disciplines.`);
         return cur;
       }
       return [...cur, id];
@@ -131,7 +163,8 @@ const AICoach = () => {
   };
 
   const generate = async () => {
-    if (!briefingWatched) {
+    // Free tier skips the briefing gate entirely.
+    if (briefingEnabled && !briefingWatched) {
       toast.error(t("co_locked"));
       return;
     }
@@ -146,10 +179,12 @@ const AICoach = () => {
       const { data, error } = await supabase.functions.invoke("generate-workout", {
         body: {
           archetype: selectedArchetype.name,
+          archetypePhrase: T[selectedArchetype.phrase].uz,
           goal,
           level,
           disciplines: disciplineNames,
           lang,
+          tier,
         },
       });
       if (error) throw error;
