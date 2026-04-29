@@ -443,9 +443,10 @@ const AICoach = () => {
           </div>
         </div>
 
-        {/* STEP 2: Warrior Briefing — appears AFTER selections confirmed */}
+        {/* STEP 2: Warrior Briefing — only for Pro/Ultra after selections confirmed.
+            FREE plan skips the briefing and goes straight to a Generate button. */}
         <AnimatePresence>
-          {selectionsConfirmed && (
+          {selectionsConfirmed && briefingEnabled && (
             <motion.div
               key="briefing"
               initial={{ opacity: 0, y: 20 }}
@@ -456,7 +457,7 @@ const AICoach = () => {
             >
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson">
-                  <Video className="h-3.5 w-3.5" /> {t("co_briefing")} · {selectedArchetype.name}
+                  <Video className="h-3.5 w-3.5" /> {t("co_briefing_must_watch")} · {selectedArchetype.name}
                 </div>
                 {briefingWatched && (
                   <div className="flex items-center gap-1.5 font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">
@@ -464,6 +465,7 @@ const AICoach = () => {
                   </div>
                 )}
               </div>
+              <div className="mb-2 font-display text-2xl text-crimson">{t(selectedArchetype.phrase)}</div>
               <div className="mb-4 font-mono-tech text-[11px] text-muted-foreground">{t("co_briefing_sub")}</div>
 
               <div className="mx-auto w-full max-w-5xl">
@@ -503,18 +505,19 @@ const AICoach = () => {
                       className="mt-3 inline-flex w-full items-center justify-center gap-2 bg-crimson px-6 py-5 font-display text-base uppercase tracking-widest text-primary-foreground transition hover:bg-primary-glow disabled:cursor-not-allowed disabled:opacity-40 shadow-crimson"
                     >
                       {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> {t("co_forging")}</>
-                        : <><Sparkles className="h-5 w-5" /> {t("co_generate")}</>}
+                        : <><Sparkles className="h-5 w-5" /> {t("co_plan_ready_btn")}</>}
                     </motion.button>
                   )}
                 </AnimatePresence>
 
-                {selectedArchetype.gallery.length > 0 && (
+                {/* Gallery: ULTRA-ONLY */}
+                {galleryEnabled && selectedArchetype.gallery.length > 0 && (
                   <button
                     onClick={() => setGalleryOpen(o => !o)}
-                    className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-primary px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson transition hover:bg-primary hover:text-primary-foreground"
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-yellow-400 px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest text-yellow-400 transition hover:bg-yellow-400 hover:text-background"
                   >
                     {galleryOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                    {galleryOpen ? t("co_hide_edits") : t("co_more_edits")} · {selectedArchetype.name}
+                    {galleryOpen ? t("co_hide_edits") : t("co_ultra_only_gallery")} · {selectedArchetype.name}
                   </button>
                 )}
 
@@ -543,6 +546,33 @@ const AICoach = () => {
                   )}
                 </AnimatePresence>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* FREE-tier shortcut: no briefing — show Generate directly + a notice. */}
+        <AnimatePresence>
+          {selectionsConfirmed && !briefingEnabled && (
+            <motion.div
+              key="free-generate"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="mx-auto mt-10 max-w-3xl border border-border bg-card p-6"
+            >
+              <div className="mb-2 font-display text-2xl">{t(selectedArchetype.phrase)}</div>
+              <div className="mb-4 font-mono-tech text-[11px] text-muted-foreground">
+                {t("co_free_no_briefing")}
+              </div>
+              <button
+                onClick={generate}
+                disabled={loading}
+                className="inline-flex w-full items-center justify-center gap-2 bg-foreground px-6 py-4 font-display text-base uppercase tracking-widest text-background transition hover:opacity-90 disabled:opacity-40"
+              >
+                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> {t("co_forging")}</>
+                  : <><Sparkles className="h-5 w-5" /> {t("co_plan_ready_btn")}</>}
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
