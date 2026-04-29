@@ -1,4 +1,4 @@
-import { Flame, GraduationCap, Github } from "lucide-react";
+import { Flame, GraduationCap, Code2 } from "lucide-react";
 
 const Footer = () => (
   <footer className="border-t border-border bg-background">
@@ -19,9 +19,9 @@ const Footer = () => (
           <div className="mt-3 inline-flex items-start gap-3 border border-border p-4">
             <GraduationCap className="h-5 w-5 text-crimson" />
             <div>
-              <div className="font-display text-xl">Jaloliddin Zoxidov</div>
-              <div className="font-mono-tech text-xs text-muted-foreground">Student ID: <span className="text-foreground">250040</span></div>
-              <div className="mt-1 font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">IDU University · Final Project</div>
+              <div className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">Front-End Development Project by</div>
+              <div className="mt-1 font-display text-xl">Jaloliddin Zoxidov</div>
+              <div className="font-mono-tech text-xs text-muted-foreground">ID: <span className="text-foreground">250040</span></div>
             </div>
           </div>
         </div>
@@ -39,8 +39,8 @@ const Footer = () => (
       </div>
 
       <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-border pt-6 font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground md:flex-row md:items-center">
-        <div>© 2026 Absolute_Frame · All rights reserved · Tashkent, UZ</div>
-        <div className="flex items-center gap-2"><Github className="h-3.5 w-3.5" /> Built for IDU Grading</div>
+        <div>© 2026 Absolute_Frame · Front-End Development Project by: Jaloliddin Zoxidov | ID: 250040</div>
+        <div className="flex items-center gap-2"><Code2 className="h-3.5 w-3.5" /> React · Tailwind · Framer Motion</div>
       </div>
     </div>
   </footer>

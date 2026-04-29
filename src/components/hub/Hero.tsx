@@ -22,7 +22,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="mt-6 font-display text-6xl leading-none md:text-[9rem]"
+          className="mt-6 font-display text-5xl leading-[0.95] sm:text-6xl md:text-[9rem]"
         >
           FORGE THE <br />
           <span className="text-stroke">BODY OF A</span> <span className="text-crimson">WARRIOR.</span>

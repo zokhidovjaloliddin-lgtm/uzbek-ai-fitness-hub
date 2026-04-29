@@ -5,10 +5,26 @@ import { storage, classifyBmi } from "@/lib/storage";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
 
+/**
+ * BodyAnalysis
+ * ------------------------------------------------------------------
+ * Front-End Development Project — Jaloliddin Zoxidov (ID: 250040)
+ *
+ * - useState: tracks the controlled inputs (height, weight) so React
+ *   re-renders the gauge and result on every keystroke.
+ * - useMemo: memoises the BMI math (weight / height^2) so the
+ *   calculation only re-runs when its dependencies change — this keeps
+ *   the UI smooth even on low-end mobile devices.
+ * - useEffect: hydrates the form from localStorage on first mount so
+ *   the user's last record persists across page refreshes.
+ */
 const BodyAnalysis = () => {
+  // Controlled inputs — strings so the <input type="number"> stays
+  // editable (empty state) without coercing to NaN.
   const [height, setHeight] = useState<string>("");
   const [weight, setWeight] = useState<string>("");
 
+  // Hydrate from localStorage on mount (runs once).
   useEffect(() => {
     const saved = storage.getBmi();
     if (saved) {
@@ -17,11 +33,13 @@ const BodyAnalysis = () => {
     }
   }, []);
 
+  // BMI = weight (kg) / height (m)^2 — memoised for performance.
   const bmi = useMemo(() => {
-    const h = parseFloat(height) / 100;
-    const w = parseFloat(weight);
-    if (!h || !w || h <= 0) return 0;
-    return +(w / (h * h)).toFixed(1);
+    const heightMeters = parseFloat(height) / 100; // cm → m
+    const weightKg = parseFloat(weight);
+    if (!heightMeters || !weightKg || heightMeters <= 0) return 0;
+    // Formula: BMI = weight / (height * height)
+    return +(weightKg / (heightMeters * heightMeters)).toFixed(1);
   }, [height, weight]);
 
   const cls = bmi > 0 ? classifyBmi(bmi) : null;
@@ -85,6 +103,10 @@ const BodyAnalysis = () => {
 
             <div className={`mt-3 inline-flex items-center gap-2 border px-3 py-1 font-mono-tech text-xs uppercase tracking-widest ${cls ? colorClasses[cls.color] : "border-border text-muted-foreground"}`}>
               <Activity className="h-3.5 w-3.5" /> {cls?.label ?? "Awaiting input"}
+            </div>
+
+            <div className="mt-2 font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">
+              Calculation logic handled via React <span className="text-crimson">useMemo</span> for performance.
             </div>
 
             <div className="mt-10">

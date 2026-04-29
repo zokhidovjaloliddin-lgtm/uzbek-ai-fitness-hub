@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, CreditCard, Loader2, ShieldCheck } from "lucide-react";
+import { Check, X, CreditCard, Loader2, ShieldCheck, Crown } from "lucide-react";
 import { storage } from "@/lib/storage";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
@@ -63,13 +63,32 @@ const TIERS: Tier[] = [
   },
 ];
 
+/**
+ * Pricing
+ * ------------------------------------------------------------------
+ * Front-End Development Project — Jaloliddin Zoxidov (ID: 250040)
+ *
+ * - useState: drives the active subscription tier, the modal target,
+ *   the multi-step payment status, and the chosen payment method.
+ * - useEffect: reads the persisted tier from localStorage on mount so
+ *   the "PREMIUM" badge survives page refreshes.
+ * - The Payme/Click confirmation flow is fully client-side: when the
+ *   user clicks "Confirm Payment", React state transitions
+ *   idle → processing → done, and the Account Status pill updates
+ *   live without any page reload.
+ */
 const Pricing = () => {
+  // --- React state -------------------------------------------------
   const [activeTier, setActiveTier] = useState("standard");
   const [payTier, setPayTier] = useState<Tier | null>(null);
   const [paying, setPaying] = useState<"idle" | "processing" | "done">("idle");
   const [method, setMethod] = useState<"payme" | "click">("payme");
 
+  // Restore last subscription tier from localStorage on first render.
   useEffect(() => { setActiveTier(storage.getTier()); }, []);
+
+  // Friendly label for the live Account Status pill.
+  const accountLabel = (activeTier ?? "standard").toUpperCase();
 
   const choose = (t: Tier) => {
     if (t.free) {
@@ -82,14 +101,17 @@ const Pricing = () => {
     setPaying("idle");
   };
 
+  // Simulated Payme/Click checkout. Updates React state in place so
+  // the UI reflects the new "PREMIUM" status without a page refresh.
   const confirmPay = () => {
     setPaying("processing");
     setTimeout(() => {
-      setPaying("done");
       if (payTier) {
         storage.setTier(payTier.id);
-        setActiveTier(payTier.id);
+        setActiveTier(payTier.id); // ← live UI update, no reload
+        toast.success(`Account Status: ${payTier.id.toUpperCase()}`);
       }
+      setPaying("done");
     }, 1600);
   };
 
@@ -106,6 +128,17 @@ const Pricing = () => {
           title={<>CHOOSE YOUR <span className="text-crimson">TIER.</span></>}
           subtitle="Three paths. One destination — total dominion over the frame."
         />
+
+        {/* Live account status — driven by React state, no refresh needed */}
+        <div className="mb-8 flex justify-center">
+          <div className={`inline-flex items-center gap-2 border px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest ${
+            activeTier === "standard"
+              ? "border-border text-muted-foreground"
+              : "border-primary text-crimson shadow-crimson"
+          }`}>
+            <Crown className="h-3.5 w-3.5" /> Account Status: <span className="text-foreground">{accountLabel}</span>
+          </div>
+        </div>
 
         <div className="grid gap-6 md:grid-cols-3">
           {TIERS.map((t, i) => (
