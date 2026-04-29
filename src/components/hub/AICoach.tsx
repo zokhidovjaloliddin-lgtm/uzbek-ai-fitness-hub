@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, RotateCw, Lock, Play, X, Video } from "lucide-react";
+import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, RotateCw, Lock, Play, ChevronDown, ChevronUp, Video, CheckCircle2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { storage } from "@/lib/storage";
@@ -15,8 +15,8 @@ const ARCHETYPES = [
     tag: "God of War",
     desc: "Brutal strength, no mercy.",
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapercave.com%2Fwp%2Fwp2683901.jpg&f=1&ipt=1e1140cde3162f8e8c5ff047f8cdbb22d14011c36a499f035d4fb8d2f6061f22",
-    primary: "3oSQDXXnXAs",
-    gallery: ["aPxjmVY8mQg", "DoLknLWDpwY", "e4NK6lc5mDA"],
+    primary: "aPxjmVY8mQg",
+    gallery: ["DoLknLWDpwY", "e4NK6lc5mDA"],
   },
   {
     id: "yujiro",
@@ -24,8 +24,8 @@ const ARCHETYPES = [
     tag: "The Ogre",
     desc: "Raw primal violence.",
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperbat.com%2Fimg%2F803104-yujiro-hanma-wallpaper-discover-more-anime-baki-the-grappler-grappler-baki-manga-yujiro-wallpaper-anime-artwork-wallpaper-western-anime-sky-anime.jpg&f=1&ipt=67233f8845dcd1907b78f74b66e2c78d05c72f45fea8949f23d63930aa90f5eb",
-    primary: "3oSQDXXnXAs",
-    gallery: ["iGo6MiBrHGg", "XfWnc97PQW4", "nmin3eOO_DA"],
+    primary: "iGo6MiBrHGg",
+    gallery: ["nmin3eOO_DA", "XfWnc97PQW4"],
   },
   {
     id: "khabib",
@@ -33,8 +33,8 @@ const ARCHETYPES = [
     tag: "The Eagle",
     desc: "Dagestani grappling, unbreakable will.",
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmrwallpaper.com%2Fimages%2Fhd%2Fkhabib-nurmagomedov-grappling-ar25l6ya1tq8f7rf.jpg&f=1&ipt=41db277f3f63eea0df018480d6a0f7874a5eb0a8856a64042f2ce0d56b48282b",
-    primary: "3oSQDXXnXAs",
-    gallery: ["wPonsvTJNnU", "ViJC105vG-s", "qijolcTZoCs"],
+    primary: "wPonsvTJNnU",
+    gallery: ["ViJC105vG-s", "qijolcTZoCs"],
   },
   {
     id: "khamzat",
@@ -58,8 +58,6 @@ const DISCIPLINES = [
 
 const GOALS = ["Strength", "Hypertrophy", "Calisthenics Mastery", "Fat Loss", "Endurance"];
 const LEVELS = ["Beginner", "Intermediate", "Advanced"];
-
-const PRIMARY_VIDEO_ID = "3oSQDXXnXAs"; // Khamzat Main Edit
 
 /**
  * AICoach
