@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Loader2, Settings, Sparkles, Trash2 } from "lucide-react";
+import { Flame, Loader2, Settings, Sparkles, Trash2, Copy } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { storage } from "@/lib/storage";
@@ -19,13 +19,29 @@ const ARCHETYPES = [
 const GOALS = ["Strength", "Hypertrophy", "Calisthenics Mastery", "Fat Loss", "Endurance"];
 const LEVELS = ["Beginner", "Intermediate", "Advanced"];
 
+/**
+ * AICoach
+ * ------------------------------------------------------------------
+ * Front-End Development Project — Jaloliddin Zoxidov (ID: 250040)
+ *
+ * - useState: holds the form configuration (archetype, goal, level),
+ *   the loading flag, and the generated plan markdown.
+ * - useEffect: rehydrates the last generated plan from localStorage
+ *   so the user keeps their workout after refreshing.
+ * - API fetching: `supabase.functions.invoke()` calls a serverless
+ *   Edge Function that proxies Google Gemini via the Lovable AI
+ *   Gateway. All errors are caught with try/catch and surfaced to the
+ *   user through `sonner` toasts.
+ */
 const AICoach = () => {
+  // --- React state -------------------------------------------------
   const [archetype, setArchetype] = useState("kratos");
   const [goal, setGoal] = useState("Calisthenics Mastery");
   const [level, setLevel] = useState("Intermediate");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<string>("");
 
+  // Restore the last generated plan on mount so refresh doesn't wipe it.
   useEffect(() => {
     const saved = storage.getPlan();
     if (saved) {
@@ -35,6 +51,8 @@ const AICoach = () => {
     }
   }, []);
 
+  // Fetch the AI workout protocol from our Edge Function.
+  // try/catch covers both network failures and AI gateway errors.
   const generate = async () => {
     setLoading(true);
     setPlan("");
@@ -63,6 +81,17 @@ const AICoach = () => {
     setPlan("");
     localStorage.removeItem("absolute_frame_plan");
     toast.message("Vault cleared.");
+  };
+
+  // Copy the generated protocol to the user's clipboard.
+  const copyPlan = async () => {
+    if (!plan) return;
+    try {
+      await navigator.clipboard.writeText(plan);
+      toast.success("Protocol copied to clipboard.");
+    } catch {
+      toast.error("Clipboard unavailable on this device.");
+    }
   };
 
   return (
@@ -142,7 +171,17 @@ const AICoach = () => {
               <div className="flex items-center gap-2 font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">
                 <Flame className="h-3.5 w-3.5 text-crimson" /> Protocol Output
               </div>
-              {plan && <span className="font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">● Saved to vault</span>}
+              <div className="flex items-center gap-3">
+                {plan && (
+                  <button
+                    onClick={copyPlan}
+                    className="inline-flex items-center gap-1.5 border border-border px-2.5 py-1 font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground transition hover:border-primary hover:text-crimson"
+                  >
+                    <Copy className="h-3 w-3" /> Copy Protocol
+                  </button>
+                )}
+                {plan && <span className="font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">● Saved</span>}
+              </div>
             </div>
 
             <AnimatePresence mode="wait">
