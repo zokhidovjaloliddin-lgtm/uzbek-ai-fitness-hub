@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { storage } from "@/lib/storage";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
-import { useLang } from "@/lib/i18n";
+import { useLang, T } from "@/lib/i18n";
 
 const ARCHETYPES = [
   {
@@ -447,9 +447,5 @@ const AICoach = () => {
     </section>
   );
 };
-
-// Re-import here to access the raw English label for AI prompt building
-// (we want the AI to see the canonical English discipline names regardless of UI lang).
-import { T } from "@/lib/i18n";
 
 export default AICoach;
