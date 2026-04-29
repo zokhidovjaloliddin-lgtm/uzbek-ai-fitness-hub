@@ -268,8 +268,10 @@ const AICoach = () => {
 
             <div className="mt-6">
               <div className="flex items-center justify-between">
-                <div className="font-mono-tech text-[11px] uppercase tracking-widest text-crimson">{t("co_disciplines")}</div>
-                <div className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">{disciplines.length}/5</div>
+                <div className="font-mono-tech text-[11px] uppercase tracking-widest text-crimson">
+                  {tier === "ultra" ? t("co_disciplines_ultra") : tier === "premium" ? t("co_disciplines_pro") : t("co_disciplines_free")}
+                </div>
+                <div className="font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">{disciplines.length}/{maxDisciplines}</div>
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {DISCIPLINES.map(d => {
@@ -326,6 +328,26 @@ const AICoach = () => {
               </button>
             )}
 
+            {/* Tier badge + Ultra-only direct coach contact */}
+            <div className="mt-4 flex flex-col gap-2">
+              <div className="inline-flex items-center justify-center gap-1.5 border border-border px-3 py-1.5 font-mono-tech text-[10px] uppercase tracking-widest">
+                <Crown className={`h-3 w-3 ${tier === "ultra" ? "text-yellow-400" : tier === "premium" ? "text-crimson" : "text-muted-foreground"}`} />
+                <span className="text-muted-foreground">Tier:</span>
+                <span className={tier === "ultra" ? "text-yellow-400" : tier === "premium" ? "text-crimson" : "text-foreground"}>
+                  {tier === "ultra" ? "ULTRA" : tier === "premium" ? "PRO" : "FREE"}
+                </span>
+              </div>
+              {tier === "ultra" && (
+                <a
+                  href="mailto:jaloliddinzokhidov@gmail.com?subject=Ultra%20Coach%20Direct%20Contact"
+                  className="inline-flex w-full items-center justify-center gap-2 border-2 px-4 py-2.5 font-mono-tech text-[10px] uppercase tracking-widest text-yellow-400 transition hover:bg-yellow-400/10"
+                  style={{ borderImage: "linear-gradient(135deg, hsl(45 100% 50%), hsl(var(--primary))) 1" }}
+                >
+                  <Mail className="h-3 w-3" /> {t("co_direct_contact")}
+                </a>
+              )}
+            </div>
+
             {plan && (
               <button onClick={clearPlan} className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-border px-6 py-3 font-mono-tech text-[11px] uppercase tracking-widest text-muted-foreground transition hover:text-crimson hover:border-primary">
                 <Trash2 className="h-3.5 w-3.5" /> {t("co_clear")}
@@ -333,8 +355,16 @@ const AICoach = () => {
             )}
           </div>
 
-          {/* Output */}
-          <div className="relative min-h-[500px] bg-card p-8 md:p-10 border-crimson-glow">
+          {/* Output — UI varies by tier (gray for Free, crimson glow for Pro, gold-crimson for Ultra) */}
+          <div className={`relative min-h-[500px] bg-card p-8 md:p-10 ${
+            tier === "ultra"
+              ? "border-2 shadow-crimson"
+              : tier === "premium"
+                ? "border-crimson-glow"
+                : "border border-border"
+          }`}
+          style={tier === "ultra" ? { borderImage: "linear-gradient(135deg, hsl(45 100% 50%), hsl(var(--primary))) 1" } : undefined}
+          >
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2 font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">
                 <Flame className="h-3.5 w-3.5 text-crimson" /> {t("co_output")}
