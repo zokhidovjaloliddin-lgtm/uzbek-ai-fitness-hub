@@ -86,17 +86,16 @@ const AICoach = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [briefingWatched, setBriefingWatched] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [activeVideo, setActiveVideo] = useState<string>(PRIMARY_VIDEO_ID);
 
   const selectedArchetype = useMemo(
     () => ARCHETYPES.find(a => a.id === archetype) ?? ARCHETYPES[0],
     [archetype]
   );
 
-  // Reset briefing when archetype changes — user must re-watch.
+  // Reset briefing & gallery when archetype changes — user must re-watch.
   useEffect(() => {
     setBriefingWatched(false);
-    setActiveVideo(selectedArchetype.primary);
+    setGalleryOpen(false);
   }, [archetype, selectedArchetype.primary]);
 
   // Restore the last generated plan on mount.
