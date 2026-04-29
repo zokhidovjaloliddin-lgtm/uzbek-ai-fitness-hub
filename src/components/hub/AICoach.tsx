@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, RotateCw, Lock, Play, X, Video } from "lucide-react";
+import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, RotateCw, Lock, Play, ChevronDown, ChevronUp, Video, CheckCircle2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { storage } from "@/lib/storage";
@@ -15,8 +15,8 @@ const ARCHETYPES = [
     tag: "God of War",
     desc: "Brutal strength, no mercy.",
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapercave.com%2Fwp%2Fwp2683901.jpg&f=1&ipt=1e1140cde3162f8e8c5ff047f8cdbb22d14011c36a499f035d4fb8d2f6061f22",
-    primary: "3oSQDXXnXAs",
-    gallery: ["aPxjmVY8mQg", "DoLknLWDpwY", "e4NK6lc5mDA"],
+    primary: "aPxjmVY8mQg",
+    gallery: ["DoLknLWDpwY", "e4NK6lc5mDA"],
   },
   {
     id: "yujiro",
@@ -24,8 +24,8 @@ const ARCHETYPES = [
     tag: "The Ogre",
     desc: "Raw primal violence.",
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperbat.com%2Fimg%2F803104-yujiro-hanma-wallpaper-discover-more-anime-baki-the-grappler-grappler-baki-manga-yujiro-wallpaper-anime-artwork-wallpaper-western-anime-sky-anime.jpg&f=1&ipt=67233f8845dcd1907b78f74b66e2c78d05c72f45fea8949f23d63930aa90f5eb",
-    primary: "3oSQDXXnXAs",
-    gallery: ["iGo6MiBrHGg", "XfWnc97PQW4", "nmin3eOO_DA"],
+    primary: "iGo6MiBrHGg",
+    gallery: ["nmin3eOO_DA", "XfWnc97PQW4"],
   },
   {
     id: "khabib",
@@ -33,8 +33,8 @@ const ARCHETYPES = [
     tag: "The Eagle",
     desc: "Dagestani grappling, unbreakable will.",
     image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmrwallpaper.com%2Fimages%2Fhd%2Fkhabib-nurmagomedov-grappling-ar25l6ya1tq8f7rf.jpg&f=1&ipt=41db277f3f63eea0df018480d6a0f7874a5eb0a8856a64042f2ce0d56b48282b",
-    primary: "3oSQDXXnXAs",
-    gallery: ["wPonsvTJNnU", "ViJC105vG-s", "qijolcTZoCs"],
+    primary: "wPonsvTJNnU",
+    gallery: ["ViJC105vG-s", "qijolcTZoCs"],
   },
   {
     id: "khamzat",
@@ -58,8 +58,6 @@ const DISCIPLINES = [
 
 const GOALS = ["Strength", "Hypertrophy", "Calisthenics Mastery", "Fat Loss", "Endurance"];
 const LEVELS = ["Beginner", "Intermediate", "Advanced"];
-
-const PRIMARY_VIDEO_ID = "3oSQDXXnXAs"; // Khamzat Main Edit
 
 /**
  * AICoach
@@ -88,17 +86,16 @@ const AICoach = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [briefingWatched, setBriefingWatched] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [activeVideo, setActiveVideo] = useState<string>(PRIMARY_VIDEO_ID);
 
   const selectedArchetype = useMemo(
     () => ARCHETYPES.find(a => a.id === archetype) ?? ARCHETYPES[0],
     [archetype]
   );
 
-  // Reset briefing when archetype changes — user must re-watch.
+  // Reset briefing & gallery when archetype changes — user must re-watch.
   useEffect(() => {
     setBriefingWatched(false);
-    setActiveVideo(selectedArchetype.primary);
+    setGalleryOpen(false);
   }, [archetype, selectedArchetype.primary]);
 
   // Restore the last generated plan on mount.
@@ -189,6 +186,81 @@ const AICoach = () => {
           subtitle={t("co_sub")}
         />
 
+        {/* MISSION BRIEFING — full-width hero video */}
+        <div className="mb-10 border-2 border-primary bg-noir p-5 shadow-crimson md:p-8">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson">
+              <Video className="h-3.5 w-3.5" /> {t("co_briefing")} · {selectedArchetype.name}
+            </div>
+            {briefingWatched && (
+              <div className="flex items-center gap-1.5 font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">
+                <CheckCircle2 className="h-3.5 w-3.5" /> {t("co_unlocked")}
+              </div>
+            )}
+          </div>
+          <div className="mb-4 font-mono-tech text-[11px] text-muted-foreground">{t("co_briefing_sub")}</div>
+
+          <div className="mx-auto w-full max-w-4xl">
+            <div className="relative aspect-video w-full overflow-hidden border-crimson-glow">
+              <iframe
+                key={selectedArchetype.primary}
+                className="absolute inset-0 h-full w-full"
+                src={`https://www.youtube.com/embed/${selectedArchetype.primary}?rel=0&modestbranding=1`}
+                title={`${selectedArchetype.name} briefing`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+
+            <button
+              onClick={() => setBriefingWatched(true)}
+              disabled={briefingWatched}
+              className={`mt-5 inline-flex w-full items-center justify-center gap-2 px-6 py-4 font-mono-tech text-xs uppercase tracking-widest transition ${
+                briefingWatched
+                  ? "border-2 border-gauge-normal bg-transparent text-gauge-normal cursor-default"
+                  : "bg-crimson text-primary-foreground hover:bg-primary-glow shadow-crimson"
+              }`}
+            >
+              {briefingWatched ? <><CheckCircle2 className="h-4 w-4" /> {t("co_unlocked")}</> : <><Sparkles className="h-4 w-4" /> {t("co_ready")}</>}
+            </button>
+
+            {selectedArchetype.gallery.length > 0 && (
+              <button
+                onClick={() => setGalleryOpen(o => !o)}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-primary px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson transition hover:bg-primary hover:text-primary-foreground"
+              >
+                {galleryOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                {galleryOpen ? t("co_hide_edits") : t("co_more_edits")} · {selectedArchetype.name}
+              </button>
+            )}
+
+            <AnimatePresence initial={false}>
+              {galleryOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    {selectedArchetype.gallery.map((id) => (
+                      <div key={id} className="aspect-video w-full overflow-hidden border-crimson-glow">
+                        <iframe
+                          className="h-full w-full"
+                          src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
+                          title={`${selectedArchetype.name} edit ${id}`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
         <div className="grid gap-px border-frame bg-border lg:grid-cols-[380px_1fr]">
           {/* Config */}
           <div className="bg-card p-8">
@@ -266,45 +338,6 @@ const AICoach = () => {
             </div>
 
             {/* MISSION BRIEFING GATE */}
-            <div className="mt-8 border-2 border-primary bg-noir p-4 shadow-crimson">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson">
-                  <Video className="h-3.5 w-3.5" /> {t("co_briefing")}
-                </div>
-                {briefingWatched && (
-                  <div className="font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">● {t("co_unlocked")}</div>
-                )}
-              </div>
-              <div className="mt-1 font-mono-tech text-[10px] text-muted-foreground">{t("co_briefing_sub")}</div>
-
-              <div
-                onClick={() => setBriefingWatched(true)}
-                className="relative mt-3 aspect-video w-full overflow-hidden border-crimson-glow cursor-pointer"
-              >
-                <iframe
-                  className="absolute inset-0 h-full w-full"
-                  src={`https://www.youtube.com/embed/${activeVideo}?rel=0&modestbranding=1`}
-                  title={`${selectedArchetype.name} briefing`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-              {!briefingWatched && (
-                <div className="mt-2 font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">
-                  {t("co_unlock_hint")}
-                </div>
-              )}
-
-              {briefingWatched && selectedArchetype.gallery.length > 0 && (
-                <button
-                  onClick={() => setGalleryOpen(true)}
-                  className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-primary px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson transition hover:bg-primary hover:text-primary-foreground"
-                >
-                  <Play className="h-3.5 w-3.5" /> {t("co_more_edits")} · {selectedArchetype.name}
-                </button>
-              )}
-            </div>
-
             <button
               onClick={generate}
               disabled={loading || !briefingWatched}
@@ -403,47 +436,6 @@ const AICoach = () => {
         </div>
       </div>
 
-      {/* WATCH MORE EDITS gallery modal */}
-      <AnimatePresence>
-        {galleryOpen && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] grid place-items-center bg-black/90 p-4"
-            onClick={() => setGalleryOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl border-2 border-primary bg-card shadow-crimson"
-            >
-              <div className="flex items-center justify-between border-b border-border p-4">
-                <div className="font-display text-2xl">{selectedArchetype.name} · Edits</div>
-                <button onClick={() => setGalleryOpen(false)} className="text-muted-foreground hover:text-crimson">
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
-                {selectedArchetype.gallery.map((id) => (
-                  <div key={id} className="aspect-video w-full overflow-hidden border-crimson-glow">
-                    <iframe
-                      className="h-full w-full"
-                      src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
-                      title={`${selectedArchetype.name} edit ${id}`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="border-t border-border p-4 text-right">
-                <button onClick={() => setGalleryOpen(false)} className="border border-border px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest hover:border-primary hover:text-crimson">
-                  {t("co_close")}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 };
