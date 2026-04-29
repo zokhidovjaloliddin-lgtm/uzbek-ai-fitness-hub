@@ -86,6 +86,10 @@ const AICoach = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [briefingWatched, setBriefingWatched] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  // Step 1: user picks archetype + disciplines, then confirms.
+  // Step 2: briefing video appears. After clicking "I am ready",
+  // the Generate Training Plan button unlocks below the video.
+  const [selectionsConfirmed, setSelectionsConfirmed] = useState(false);
 
   const selectedArchetype = useMemo(
     () => ARCHETYPES.find(a => a.id === archetype) ?? ARCHETYPES[0],
@@ -96,7 +100,14 @@ const AICoach = () => {
   useEffect(() => {
     setBriefingWatched(false);
     setGalleryOpen(false);
+    setSelectionsConfirmed(false);
   }, [archetype, selectedArchetype.primary]);
+
+  // If user changes disciplines after confirming, force re-confirmation.
+  useEffect(() => {
+    setSelectionsConfirmed(false);
+    setBriefingWatched(false);
+  }, [disciplines.join(",")]);
 
   // Restore the last generated plan on mount.
   useEffect(() => {
@@ -149,11 +160,11 @@ const AICoach = () => {
         archetype, goal, plan: text,
         savedAt: new Date().toISOString(),
       });
-      toast.success("Protocol forged. Moshshniy!");
+      toast.success(t("co_success"));
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Unknown error";
       setErrorMsg(msg);
-      toast.error(`Coach offline: ${msg}`);
+      toast.error(`${t("co_err_title")} ${t("co_err_sub")}`);
     } finally {
       setLoading(false);
     }
@@ -162,14 +173,14 @@ const AICoach = () => {
   const clearPlan = () => {
     setPlan("");
     localStorage.removeItem("absolute_frame_plan");
-    toast.message("Vault cleared.");
+    toast.message("Vault cleared. Aka, qayta boshlaymiz.");
   };
 
   const copyPlan = async () => {
     if (!plan) return;
     try {
       await navigator.clipboard.writeText(plan);
-      toast.success("Protocol copied to clipboard.");
+      toast.success("Moshshniy! Reja nusxalandi.");
     } catch {
       toast.error("Clipboard unavailable on this device.");
     }
