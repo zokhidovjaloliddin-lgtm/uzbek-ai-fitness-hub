@@ -69,6 +69,8 @@ export const T: Dict = {
   co_unlocked: { en: "Briefing complete · Protocol unlocked", uz: "Briefing tugadi · Protokol ochildi" },
   co_more_edits: { en: "Watch More Edits", uz: "Yana Ediltlar" },
   co_close: { en: "Close", uz: "Yopish" },
+  co_ready: { en: "I AM READY TO TRAIN", uz: "MASHG'ULOTNI BOSHLASHGA TAYYORMAN" },
+  co_hide_edits: { en: "Hide Edits", uz: "Edittlarni Yashirish" },
   co_output: { en: "Protocol Output", uz: "Protokol Natijasi" },
   co_copy: { en: "Copy Protocol", uz: "Protokolni Nusxalash" },
   co_clear: { en: "Clear Vault", uz: "Xotirani Tozalash" },
