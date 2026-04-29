@@ -47,6 +47,17 @@ export const storage = {
   },
 };
 
+/**
+ * Return the highest active tier the user owns: "ultra" > "premium" > "standard".
+ * Pricing tiers map: standard = FREE, premium = PRO, ultra = ULTRA.
+ */
+export function getActiveTier(): "standard" | "premium" | "ultra" {
+  const subs = storage.getSubs();
+  if (subs.includes("ultra")) return "ultra";
+  if (subs.includes("premium")) return "premium";
+  return "standard";
+}
+
 export function classifyBmi(bmi: number) {
   if (bmi < 18.5) return { label: "Underweight", color: "gauge-under", pos: 12 };
   if (bmi < 25) return { label: "Normal", color: "gauge-normal", pos: 37 };
