@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { ArrowDown, Zap } from "lucide-react";
+import { useLang } from "@/lib/i18n";
 
 const Hero = () => {
+  const { t } = useLang();
   return (
     <section id="top" className="relative overflow-hidden border-b border-border">
       <div className="absolute inset-0 -z-10 gradient-blood opacity-80" />
@@ -15,7 +17,7 @@ const Hero = () => {
           className="flex items-center gap-3 font-mono-tech text-xs uppercase tracking-[0.3em] text-crimson"
         >
           <span className="h-px w-10 bg-crimson" />
-          <Zap className="h-3.5 w-3.5" /> Primordial Protocol · v1.0
+          <Zap className="h-3.5 w-3.5" /> {t("hero_kicker")}
         </motion.div>
 
         <motion.h1
@@ -24,8 +26,8 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="mt-6 font-display text-5xl leading-[0.95] sm:text-6xl md:text-[9rem]"
         >
-          FORGE THE <br />
-          <span className="text-stroke">BODY OF A</span> <span className="text-crimson">WARRIOR.</span>
+          {t("hero_title_1")} <br />
+          <span className="text-stroke">{t("hero_title_2")}</span> <span className="text-crimson">{t("hero_title_3")}</span>
         </motion.h1>
 
         <motion.p
@@ -34,7 +36,7 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="mt-8 max-w-xl text-lg text-muted-foreground"
         >
-          AI-driven calisthenics protocols built for Tashkent streets. Track your stats, unleash your archetype, train with savage Uzbek-English slang.
+          {t("hero_sub")}
           <span className="block mt-2 font-mono-tech text-sm text-foreground">Boriku, brat. Beast mode aktivatsiya.</span>
         </motion.p>
 
@@ -45,10 +47,10 @@ const Hero = () => {
           className="mt-10 flex flex-wrap gap-4"
         >
           <a href="#analysis" className="group relative inline-flex items-center gap-3 bg-crimson px-8 py-4 font-mono-tech text-sm uppercase tracking-widest text-primary-foreground shadow-crimson transition hover:bg-primary-glow">
-            Begin Analysis <ArrowDown className="h-4 w-4 transition group-hover:translate-y-1" />
+            {t("hero_cta_1")} <ArrowDown className="h-4 w-4 transition group-hover:translate-y-1" />
           </a>
           <a href="#coach" className="inline-flex items-center gap-3 border border-border px-8 py-4 font-mono-tech text-sm uppercase tracking-widest text-foreground transition hover:border-primary hover:text-crimson">
-            Summon Coach
+            {t("hero_cta_2")}
           </a>
         </motion.div>
 
@@ -61,7 +63,7 @@ const Hero = () => {
         >
           {[
             ["05", "Day Protocol"],
-            ["08", "Warrior Archetypes"],
+            ["04", "Warrior Archetypes"],
             ["12+", "Tashkent Parks"],
             ["∞", "Mind Reps"],
           ].map(([n, l]) => (

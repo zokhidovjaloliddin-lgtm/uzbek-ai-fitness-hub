@@ -4,6 +4,7 @@ import { Weight, Ruler, Activity, Save } from "lucide-react";
 import { storage, classifyBmi } from "@/lib/storage";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
+import { useLang } from "@/lib/i18n";
 
 /**
  * BodyAnalysis
@@ -19,6 +20,7 @@ import SectionHeader from "./SectionHeader";
  *   the user's last record persists across page refreshes.
  */
 const BodyAnalysis = () => {
+  const { t } = useLang();
   // Controlled inputs — strings so the <input type="number"> stays
   // editable (empty state) without coercing to NaN.
   const [height, setHeight] = useState<string>("");
@@ -66,9 +68,9 @@ const BodyAnalysis = () => {
     <section id="analysis" className="border-b border-border py-24">
       <div className="container mx-auto">
         <SectionHeader
-          tag="01 / Body Analysis"
-          title={<>KNOW YOUR <span className="text-crimson">FRAME.</span></>}
-          subtitle="Enter your raw stats. The system computes your BMI in real time and locks it into your local vault."
+          tag={t("ba_tag")}
+          title={<>{t("ba_title_1")} <span className="text-crimson">{t("ba_title_2")}</span></>}
+          subtitle={t("ba_sub")}
         />
 
         <div className="grid gap-px border-frame bg-border lg:grid-cols-2">
@@ -82,7 +84,7 @@ const BodyAnalysis = () => {
                 disabled={!cls}
                 className="inline-flex w-full items-center justify-center gap-2 bg-crimson px-6 py-4 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground transition hover:bg-primary-glow disabled:cursor-not-allowed disabled:opacity-30"
               >
-                <Save className="h-4 w-4" /> Lock Into Vault
+                <Save className="h-4 w-4" /> {t("ba_save")}
               </button>
             </div>
           </div>
