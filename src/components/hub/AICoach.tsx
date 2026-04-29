@@ -86,6 +86,10 @@ const AICoach = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [briefingWatched, setBriefingWatched] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  // Step 1: user picks archetype + disciplines, then confirms.
+  // Step 2: briefing video appears. After clicking "I am ready",
+  // the Generate Training Plan button unlocks below the video.
+  const [selectionsConfirmed, setSelectionsConfirmed] = useState(false);
 
   const selectedArchetype = useMemo(
     () => ARCHETYPES.find(a => a.id === archetype) ?? ARCHETYPES[0],
@@ -96,7 +100,14 @@ const AICoach = () => {
   useEffect(() => {
     setBriefingWatched(false);
     setGalleryOpen(false);
+    setSelectionsConfirmed(false);
   }, [archetype, selectedArchetype.primary]);
+
+  // If user changes disciplines after confirming, force re-confirmation.
+  useEffect(() => {
+    setSelectionsConfirmed(false);
+    setBriefingWatched(false);
+  }, [disciplines.join(",")]);
 
   // Restore the last generated plan on mount.
   useEffect(() => {
@@ -149,11 +160,11 @@ const AICoach = () => {
         archetype, goal, plan: text,
         savedAt: new Date().toISOString(),
       });
-      toast.success("Protocol forged. Moshshniy!");
+      toast.success(t("co_success"));
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Unknown error";
       setErrorMsg(msg);
-      toast.error(`Coach offline: ${msg}`);
+      toast.error(`${t("co_err_title")} ${t("co_err_sub")}`);
     } finally {
       setLoading(false);
     }
@@ -162,14 +173,14 @@ const AICoach = () => {
   const clearPlan = () => {
     setPlan("");
     localStorage.removeItem("absolute_frame_plan");
-    toast.message("Vault cleared.");
+    toast.message("Vault cleared. Aka, qayta boshlaymiz.");
   };
 
   const copyPlan = async () => {
     if (!plan) return;
     try {
       await navigator.clipboard.writeText(plan);
-      toast.success("Protocol copied to clipboard.");
+      toast.success("Moshshniy! Reja nusxalandi.");
     } catch {
       toast.error("Clipboard unavailable on this device.");
     }
@@ -185,81 +196,6 @@ const AICoach = () => {
           title={<>{t("co_title_1")} <span className="text-crimson">{t("co_title_2")}</span></>}
           subtitle={t("co_sub")}
         />
-
-        {/* MISSION BRIEFING — full-width hero video */}
-        <div className="mb-10 border-2 border-primary bg-noir p-5 shadow-crimson md:p-8">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson">
-              <Video className="h-3.5 w-3.5" /> {t("co_briefing")} · {selectedArchetype.name}
-            </div>
-            {briefingWatched && (
-              <div className="flex items-center gap-1.5 font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">
-                <CheckCircle2 className="h-3.5 w-3.5" /> {t("co_unlocked")}
-              </div>
-            )}
-          </div>
-          <div className="mb-4 font-mono-tech text-[11px] text-muted-foreground">{t("co_briefing_sub")}</div>
-
-          <div className="mx-auto w-full max-w-4xl">
-            <div className="relative aspect-video w-full overflow-hidden border-crimson-glow">
-              <iframe
-                key={selectedArchetype.primary}
-                className="absolute inset-0 h-full w-full"
-                src={`https://www.youtube.com/embed/${selectedArchetype.primary}?rel=0&modestbranding=1`}
-                title={`${selectedArchetype.name} briefing`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-
-            <button
-              onClick={() => setBriefingWatched(true)}
-              disabled={briefingWatched}
-              className={`mt-5 inline-flex w-full items-center justify-center gap-2 px-6 py-4 font-mono-tech text-xs uppercase tracking-widest transition ${
-                briefingWatched
-                  ? "border-2 border-gauge-normal bg-transparent text-gauge-normal cursor-default"
-                  : "bg-crimson text-primary-foreground hover:bg-primary-glow shadow-crimson"
-              }`}
-            >
-              {briefingWatched ? <><CheckCircle2 className="h-4 w-4" /> {t("co_unlocked")}</> : <><Sparkles className="h-4 w-4" /> {t("co_ready")}</>}
-            </button>
-
-            {selectedArchetype.gallery.length > 0 && (
-              <button
-                onClick={() => setGalleryOpen(o => !o)}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-primary px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson transition hover:bg-primary hover:text-primary-foreground"
-              >
-                {galleryOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                {galleryOpen ? t("co_hide_edits") : t("co_more_edits")} · {selectedArchetype.name}
-              </button>
-            )}
-
-            <AnimatePresence initial={false}>
-              {galleryOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-4 grid gap-4 md:grid-cols-2">
-                    {selectedArchetype.gallery.map((id) => (
-                      <div key={id} className="aspect-video w-full overflow-hidden border-crimson-glow">
-                        <iframe
-                          className="h-full w-full"
-                          src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
-                          title={`${selectedArchetype.name} edit ${id}`}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
 
         <div className="grid gap-px border-frame bg-border lg:grid-cols-[380px_1fr]">
           {/* Config */}
@@ -337,16 +273,23 @@ const AICoach = () => {
               </div>
             </div>
 
-            {/* MISSION BRIEFING GATE */}
-            <button
-              onClick={generate}
-              disabled={loading || !briefingWatched}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 bg-crimson px-6 py-4 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground transition hover:bg-primary-glow disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> {t("co_forging")}</>
-                : !briefingWatched ? <><Lock className="h-4 w-4" /> {t("co_locked")}</>
-                : <><Sparkles className="h-4 w-4" /> {t("co_generate")}</>}
-            </button>
+            {/* STEP 1: Confirm Selections (reveals briefing video) */}
+            {!selectionsConfirmed ? (
+              <button
+                onClick={() => setSelectionsConfirmed(true)}
+                disabled={disciplines.length === 0}
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 bg-crimson px-6 py-4 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground transition hover:bg-primary-glow disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Sparkles className="h-4 w-4" /> {t("co_confirm")}
+              </button>
+            ) : (
+              <button
+                onClick={() => { setSelectionsConfirmed(false); setBriefingWatched(false); }}
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 border border-border px-6 py-3 font-mono-tech text-[11px] uppercase tracking-widest text-muted-foreground transition hover:border-primary hover:text-crimson"
+              >
+                <RotateCw className="h-3.5 w-3.5" /> {t("co_change_selections")}
+              </button>
+            )}
 
             {plan && (
               <button onClick={clearPlan} className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-border px-6 py-3 font-mono-tech text-[11px] uppercase tracking-widest text-muted-foreground transition hover:text-crimson hover:border-primary">
@@ -434,6 +377,110 @@ const AICoach = () => {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* STEP 2: Warrior Briefing — appears AFTER selections confirmed */}
+        <AnimatePresence>
+          {selectionsConfirmed && (
+            <motion.div
+              key="briefing"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="mt-10 border-2 border-primary bg-noir p-5 shadow-crimson md:p-8"
+            >
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson">
+                  <Video className="h-3.5 w-3.5" /> {t("co_briefing")} · {selectedArchetype.name}
+                </div>
+                {briefingWatched && (
+                  <div className="flex items-center gap-1.5 font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> {t("co_unlocked")}
+                  </div>
+                )}
+              </div>
+              <div className="mb-4 font-mono-tech text-[11px] text-muted-foreground">{t("co_briefing_sub")}</div>
+
+              <div className="mx-auto w-full max-w-5xl">
+                <div className="relative aspect-video w-full overflow-hidden border-crimson-glow">
+                  <iframe
+                    key={selectedArchetype.primary}
+                    className="absolute inset-0 h-full w-full"
+                    src={`https://www.youtube.com/embed/${selectedArchetype.primary}?rel=0&modestbranding=1`}
+                    title={`${selectedArchetype.name} briefing`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+
+                <button
+                  onClick={() => setBriefingWatched(true)}
+                  disabled={briefingWatched}
+                  className={`mt-5 inline-flex w-full items-center justify-center gap-2 px-6 py-4 font-mono-tech text-xs uppercase tracking-widest transition ${
+                    briefingWatched
+                      ? "border-2 border-gauge-normal bg-transparent text-gauge-normal cursor-default"
+                      : "bg-crimson text-primary-foreground hover:bg-primary-glow shadow-crimson"
+                  }`}
+                >
+                  {briefingWatched ? <><CheckCircle2 className="h-4 w-4" /> {t("co_unlocked")}</> : <><Sparkles className="h-4 w-4" /> {t("co_ready")}</>}
+                </button>
+
+                {/* STEP 3: Generate Training Plan — only visible AFTER briefing video shown */}
+                <AnimatePresence>
+                  {briefingWatched && (
+                    <motion.button
+                      key="generate"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      onClick={generate}
+                      disabled={loading}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-2 bg-crimson px-6 py-5 font-display text-base uppercase tracking-widest text-primary-foreground transition hover:bg-primary-glow disabled:cursor-not-allowed disabled:opacity-40 shadow-crimson"
+                    >
+                      {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> {t("co_forging")}</>
+                        : <><Sparkles className="h-5 w-5" /> {t("co_generate")}</>}
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+
+                {selectedArchetype.gallery.length > 0 && (
+                  <button
+                    onClick={() => setGalleryOpen(o => !o)}
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-primary px-4 py-2 font-mono-tech text-[11px] uppercase tracking-widest text-crimson transition hover:bg-primary hover:text-primary-foreground"
+                  >
+                    {galleryOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                    {galleryOpen ? t("co_hide_edits") : t("co_more_edits")} · {selectedArchetype.name}
+                  </button>
+                )}
+
+                <AnimatePresence initial={false}>
+                  {galleryOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-4 grid gap-4 md:grid-cols-2">
+                        {selectedArchetype.gallery.map((id) => (
+                          <div key={id} className="aspect-video w-full overflow-hidden border-crimson-glow">
+                            <iframe
+                              className="h-full w-full"
+                              src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
+                              title={`${selectedArchetype.name} edit ${id}`}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
     </section>
