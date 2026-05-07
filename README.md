@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Welcome to my project
 # 👊 ABSOLUTE FRAME - Street Training Protocol
 
 **Developer:** Jaloliddin Zoxidov (ID: 250040)  
