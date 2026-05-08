@@ -2,8 +2,8 @@
 # 👊 ABSOLUTE FRAME - Street Training Protocol
 
 **Developer:** Jaloliddin Zoxidov (ID: 250040)  
-**Live Demo:** [ https://github.com/zokhidovjaloliddin-lgtm/uzbek-ai-fitness-hub ]
-
+**GITHUB link:** [ https://github.com/zokhidovjaloliddin-lgtm/uzbek-ai-fitness-hub ] 
+App link [ https://uzbek-fit-ai-hub.lovable.app ]
 ### 📝 Project Overview
 Absolute Frame is a high-intensity fitness application built with React.js. It features a unique "Warrior Briefing" gate that requires users to engage with motivational content before unlocking their personalized training protocols. 
 
