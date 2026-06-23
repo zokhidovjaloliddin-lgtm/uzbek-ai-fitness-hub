@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Flame, Mail, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLang } from "@/lib/i18n";
+import AuthBar from "./AuthBar";
 
 const Navbar = () => {
   const { lang, setLang, t } = useLang();
@@ -60,6 +61,7 @@ const Navbar = () => {
               aria-pressed={lang === "uz"}
             >UZ</button>
           </div>
+          <AuthBar />
         </div>
       </div>
     </motion.header>
