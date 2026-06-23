@@ -5,6 +5,38 @@ export type Lang = "en" | "uz";
 type Dict = Record<string, { en: string; uz: string }>;
 
 export const T: Dict = {
+  // Onboarding / Auth
+  onb_pick_language: { en: "Choose your language", uz: "Tilni tanlang" },
+  onb_english: { en: "English", uz: "Ingliz tili" },
+  onb_uzbek: { en: "O'zbek", uz: "O'zbek" },
+  onb_welcome_title: { en: "Welcome, Warrior", uz: "Xush kelibsiz, Bahodir" },
+  onb_welcome_sub: { en: "Yujiro, Kratos, Khabib, Khamzat — the council is waiting.", uz: "Yujiro, Kratos, Xabib, Hamzat — kengash kutmoqda." },
+  onb_get_started: { en: "Let's Get Started", uz: "Boshlaymiz" },
+  auth_sign_in: { en: "Sign In", uz: "Kirish" },
+  auth_sign_up: { en: "Sign Up", uz: "Ro'yxatdan o'tish" },
+  auth_sign_out: { en: "Log Out", uz: "Chiqish" },
+  auth_email: { en: "Email", uz: "Email" },
+  auth_password: { en: "Password", uz: "Parol" },
+  auth_continue_google: { en: "Continue with Google", uz: "Google bilan davom etish" },
+  auth_or: { en: "or", uz: "yoki" },
+  auth_have_account: { en: "Already have an account?", uz: "Hisobingiz bormi?" },
+  auth_no_account: { en: "No account yet?", uz: "Hisob yo'qmi?" },
+  // Goals
+  goals_tag: { en: "00 / Goals", uz: "00 / Maqsadlar" },
+  goals_title_1: { en: "PICK YOUR", uz: "MAQSADINGNI" },
+  goals_title_2: { en: "MISSION.", uz: "TANLA." },
+  goals_sub: { en: "Select one or both. Saved to your warrior file.", uz: "Bittasini yoki ikkalasini tanla. Profilingga saqlanadi." },
+  goal_strong: { en: "Get Insanely Strong", uz: "Insondan Kuchli Bo'l" },
+  goal_strong_sub: { en: "Yujiro & Kratos energy", uz: "Yujiro va Kratos energiyasi" },
+  goal_fight: { en: "Street Fighting / MMA Domination", uz: "Ko'cha Janggi / MMA Hukmronligi" },
+  goal_fight_sub: { en: "Khabib & Khamzat energy", uz: "Xabib va Hamzat energiyasi" },
+  goals_save: { en: "Lock In Mission", uz: "Maqsadni Saqlash" },
+  goals_login_required: { en: "Sign in to save your goals.", uz: "Maqsadlarni saqlash uchun kiring." },
+  // Tier admin
+  tier_label: { en: "Membership Tier", uz: "A'zolik Darajasi" },
+  tier_free: { en: "Free", uz: "Bepul" },
+  tier_pro: { en: "Pro", uz: "Pro" },
+  tier_ultra: { en: "Ultra", uz: "Ultra" },
   // Navbar
   nav_analysis: { en: "Body Analysis", uz: "Tana Tahlili" },
   nav_coach: { en: "AI Coach", uz: "AI Murabbiy" },
