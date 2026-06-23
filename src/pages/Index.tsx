@@ -5,12 +5,11 @@ import GoalsPicker from "@/components/hub/GoalsPicker";
 import AICoach from "@/components/hub/AICoach";
 import Pricing from "@/components/hub/Pricing";
 import Footer from "@/components/hub/Footer";
-import { LanguageProvider } from "@/lib/i18n";
 import OnboardingGate from "@/components/onboarding/OnboardingGate";
 
 const Index = () => {
   return (
-    <LanguageProvider>
+    <>
     <OnboardingGate />
     <main className="min-h-screen bg-background text-foreground">
       <Navbar />
@@ -22,7 +21,7 @@ const Index = () => {
       <Pricing />
       <Footer />
     </main>
-    </LanguageProvider>
+    </>
   );
 };
 
