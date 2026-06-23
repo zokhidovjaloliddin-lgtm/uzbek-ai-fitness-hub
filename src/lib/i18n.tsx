@@ -156,21 +156,36 @@ export const T: Dict = {
   d_cali: { en: "Calisthenics", uz: "Kalisteniks" },
 };
 
-type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (key: keyof typeof T) => string };
-const LangContext = createContext<Ctx>({ lang: "en", setLang: () => {}, t: (k) => T[k]?.en ?? String(k) });
+type Ctx = {
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  t: (key: keyof typeof T) => string;
+  hasChosen: boolean;
+};
+const LangContext = createContext<Ctx>({
+  lang: "en",
+  setLang: () => {},
+  t: (k) => T[k]?.en ?? String(k),
+  hasChosen: false,
+});
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [lang, setLangState] = useState<Lang>("en");
+  const [hasChosen, setHasChosen] = useState(false);
   useEffect(() => {
     const saved = localStorage.getItem("absolute_frame_lang") as Lang | null;
-    if (saved === "en" || saved === "uz") setLangState(saved);
+    if (saved === "en" || saved === "uz") {
+      setLangState(saved);
+      setHasChosen(true);
+    }
   }, []);
   const setLang = (l: Lang) => {
     setLangState(l);
+    setHasChosen(true);
     localStorage.setItem("absolute_frame_lang", l);
   };
   const t = (key: keyof typeof T) => T[key]?.[lang] ?? T[key]?.en ?? String(key);
-  return <LangContext.Provider value={{ lang, setLang, t }}>{children}</LangContext.Provider>;
+  return <LangContext.Provider value={{ lang, setLang, t, hasChosen }}>{children}</LangContext.Provider>;
 };
 
 export const useLang = () => useContext(LangContext);
