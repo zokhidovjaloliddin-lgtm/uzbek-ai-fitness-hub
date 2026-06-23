@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          bmi: number | null
+          bmi_category: string | null
+          created_at: string
+          email: string | null
+          goals: string[]
+          height_cm: number | null
+          membership_tier: string
+          preferred_language: string
+          updated_at: string
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          bmi?: number | null
+          bmi_category?: string | null
+          created_at?: string
+          email?: string | null
+          goals?: string[]
+          height_cm?: number | null
+          membership_tier?: string
+          preferred_language?: string
+          updated_at?: string
+          user_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          bmi?: number | null
+          bmi_category?: string | null
+          created_at?: string
+          email?: string | null
+          goals?: string[]
+          height_cm?: number | null
+          membership_tier?: string
+          preferred_language?: string
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
