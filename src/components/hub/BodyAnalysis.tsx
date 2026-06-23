@@ -5,6 +5,8 @@ import { storage, classifyBmi } from "@/lib/storage";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * BodyAnalysis
@@ -21,6 +23,7 @@ import { useLang } from "@/lib/i18n";
  */
 const BodyAnalysis = () => {
   const { t } = useLang();
+  const { isAuthed, profile, refreshProfile } = useAuth();
   // Controlled inputs — strings so the <input type="number"> stays
   // editable (empty state) without coercing to NaN.
   const [height, setHeight] = useState<string>("");
@@ -34,6 +37,12 @@ const BodyAnalysis = () => {
       setWeight(String(saved.weight));
     }
   }, []);
+
+  // Prefer profile values once they're available.
+  useEffect(() => {
+    if (profile?.height_cm) setHeight(String(profile.height_cm));
+    if (profile?.weight_kg) setWeight(String(profile.weight_kg));
+  }, [profile?.user_id, profile?.height_cm, profile?.weight_kg]);
 
   // BMI = weight (kg) / height (m)^2 — memoised for performance.
   const bmi = useMemo(() => {
@@ -53,7 +62,7 @@ const BodyAnalysis = () => {
     "gauge-obese": "border-gauge-obese text-gauge-obese",
   };
 
-  const onSave = () => {
+  const onSave = async () => {
     if (!cls) { toast.error("Enter height and weight first."); return; }
     storage.setBmi({
       height: parseFloat(height),
@@ -61,7 +70,25 @@ const BodyAnalysis = () => {
       bmi, category: cls.label,
       savedAt: new Date().toISOString(),
     });
-    toast.success("Stats saved. Zo'r ish, brat!");
+    if (isAuthed && profile) {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          height_cm: parseFloat(height),
+          weight_kg: parseFloat(weight),
+          bmi,
+          bmi_category: cls.label,
+        })
+        .eq("user_id", profile.user_id);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      refreshProfile();
+      toast.success("Stats locked into your warrior file.");
+    } else {
+      toast.success("Stats saved locally. Sign in to persist to your account.");
+    }
   };
 
   return (
