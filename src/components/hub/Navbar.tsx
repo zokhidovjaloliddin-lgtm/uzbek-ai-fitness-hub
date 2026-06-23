@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Flame, Mail } from "lucide-react";
+import { Flame, Mail, MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useLang } from "@/lib/i18n";
 
 const Navbar = () => {
@@ -33,6 +34,12 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
+          <Link
+            to="/coach-chat"
+            className="inline-flex items-center gap-1.5 border border-emerald-400 px-3 py-1.5 font-mono-tech text-[11px] uppercase tracking-widest text-emerald-400 transition hover:bg-emerald-400 hover:text-black"
+          >
+            <MessageSquare className="h-3.5 w-3.5" /> AI Chat
+          </Link>
           <a
             href="mailto:jaloliddinzokhidov@gmail.com"
             className="inline-flex items-center gap-1.5 border border-primary px-3 py-1.5 font-mono-tech text-[11px] uppercase tracking-widest text-crimson transition hover:bg-crimson hover:text-primary-foreground"
