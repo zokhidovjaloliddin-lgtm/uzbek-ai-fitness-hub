@@ -42,10 +42,13 @@ export type Database = {
         Row: {
           bmi: number | null
           bmi_category: string | null
+          chosen_character: string | null
           created_at: string
+          display_name: string | null
           email: string | null
           goals: string[]
           height_cm: number | null
+          intensity_level: string
           membership_tier: string
           preferred_language: string
           updated_at: string
@@ -55,10 +58,13 @@ export type Database = {
         Insert: {
           bmi?: number | null
           bmi_category?: string | null
+          chosen_character?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string | null
           goals?: string[]
           height_cm?: number | null
+          intensity_level?: string
           membership_tier?: string
           preferred_language?: string
           updated_at?: string
@@ -68,10 +74,13 @@ export type Database = {
         Update: {
           bmi?: number | null
           bmi_category?: string | null
+          chosen_character?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string | null
           goals?: string[]
           height_cm?: number | null
+          intensity_level?: string
           membership_tier?: string
           preferred_language?: string
           updated_at?: string

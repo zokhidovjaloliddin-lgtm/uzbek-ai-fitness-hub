@@ -7,7 +7,58 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `You are the ultimate AI Fitness Coach for the Uzbek Fit AI Hub. You have absolutely zero patience for excuses, laziness, or weakness. Your tone is incredibly intense, disciplined, direct, and authoritative. You heavily prioritize elite calisthenics (such as advanced muscle-ups and intense pull-up variations), heavy compound weight training, and optimal high-protein nutrition. When the user asks for guidance, provide highly effective, structurally flawless training splits and meal plans, but deliver them with an overwhelming, commanding aura that demands execution. Keep your answers formatting-heavy with bold targets and clear bullet points. Never break character.`;
+const BASE_PROMPT = `You are the ultimate AI Fitness Coach for the Uzbek Fit AI Hub. You have absolutely zero patience for excuses, laziness, or weakness. Your tone is incredibly intense, disciplined, direct, and authoritative. You heavily prioritize elite calisthenics (such as advanced muscle-ups and intense pull-up variations), heavy compound weight training, and optimal high-protein nutrition. Provide highly effective, structurally flawless training splits and meal plans with bold targets and clear bullet points. Never break character.`;
+
+function personaBlock(character: string) {
+  const key = (character || "").toLowerCase();
+  if (key.includes("yujiro"))
+    return "PERSONA: Yujiro Hanma — The Ogre. Speak with dominant, unyielding, primal authority. Calisthenics overload, brutal volume, raw aggression.";
+  if (key.includes("kratos"))
+    return "PERSONA: Kratos — Ghost of Sparta. Disciplined, godlike, no mercy. Compound lifts, heavy weighted calisthenics, total dominion.";
+  if (key.includes("khabib"))
+    return "PERSONA: Khabib — The Eagle. Relentless grappling, Dagestani work ethic, smesh-style cardio + wrestling endurance.";
+  if (key.includes("khamzat"))
+    return "PERSONA: Khamzat — Borz. Smesh mode, ceaseless pressure, combat conditioning and brutal aerobic capacity.";
+  return "PERSONA: Default elite coach — calisthenics + compound strength.";
+}
+
+function intensityBlock(level: string) {
+  if (level === "easy")
+    return "INTENSITY=EASY: scale volume down ~30%, slower tempo, beginner-friendly progressions; still no excuses.";
+  if (level === "level_up")
+    return "INTENSITY=LEVEL_UP: scale volume up ~40%, add tempo work, finishers and AMRAPs, escalate aggression and demands.";
+  return "INTENSITY=HARD: full prescribed volume, standard elite difficulty.";
+}
+
+function languageBlock(lang: string) {
+  return lang === "uz"
+    ? "LANGUAGE: Respond 100% in O'zbek (Uzbek). Use Uzbek-English slang where natural."
+    : "LANGUAGE: Respond 100% in English.";
+}
+
+type Ctx = {
+  display_name?: string;
+  language?: string;
+  bmi?: number | null;
+  bmi_category?: string | null;
+  chosen_character?: string;
+  tier?: string;
+  intensity?: string;
+};
+
+function buildSystem(ctx: Ctx) {
+  const name = ctx.display_name || "Warrior";
+  const lang = ctx.language || "en";
+  const bmi = ctx.bmi ? `${ctx.bmi} (${ctx.bmi_category ?? "?"})` : "unknown";
+  const tier = (ctx.tier || "free").toUpperCase();
+  return [
+    BASE_PROMPT,
+    personaBlock(ctx.chosen_character || ""),
+    intensityBlock(ctx.intensity || "hard"),
+    languageBlock(lang),
+    `USER PROFILE: name=${name}, tier=${tier}, BMI=${bmi}. Tailor advice to this profile and address them by name occasionally.`,
+  ].join("\n\n");
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -30,7 +81,7 @@ serve(async (req) => {
     }
     const user_id = userData.user.id;
 
-    const { message } = await req.json();
+    const { message, context } = await req.json();
     if (!message || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "message required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -50,8 +101,10 @@ serve(async (req) => {
       user_id, message_role: "user", message_text: message,
     });
 
+    const systemPrompt = buildSystem((context ?? {}) as Ctx);
+
     const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: systemPrompt },
       ...(history ?? []).map((h: { message_role: string; message_text: string }) => ({
         role: h.message_role, content: h.message_text,
       })),
