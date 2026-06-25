@@ -12,6 +12,9 @@ export type ProfileRow = {
   bmi: number | null;
   bmi_category: string | null;
   membership_tier: "free" | "pro" | "ultra";
+  display_name: string | null;
+  chosen_character: string | null;
+  intensity_level: string | null;
 };
 
 export function useAuth() {
