@@ -1,14 +1,17 @@
-import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Dumbbell, Paperclip, Send, User2, X } from "lucide-react";
+import { ArrowLeft, Dumbbell, Paperclip, Send, User2, X, Flame, Zap, Skull } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import coachBg from "@/assets/coach-bg.jpeg.asset.json";
+import { useAuth } from "@/hooks/useAuth";
+import TierLock from "@/components/hub/TierLock";
 
 type Msg = { id: string; role: "user" | "assistant"; text: string; pending?: boolean };
+type Intensity = "easy" | "hard" | "level_up";
 
 const SUGGESTIONS = [
   "Build me a 5-day push/pull/legs split",
@@ -17,23 +20,29 @@ const SUGGESTIONS = [
 ];
 
 export default function CoachChat() {
+  const nav = useNavigate();
+  const { isAuthed, profile, loading: authLoading } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   const [ready, setReady] = useState(false);
+  const [intensity, setIntensity] = useState<Intensity>("hard");
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  // Anonymous sign-in + initial history
+  const tier = (profile?.membership_tier ?? "free") as "free" | "pro" | "ultra";
+  const locked = !isAuthed || tier === "free";
+
+  // Load history once authed and on a paid tier.
   useEffect(() => {
+    if (authLoading) return;
+    if (locked) {
+      setReady(true);
+      return;
+    }
     (async () => {
       try {
-        const { data: sess } = await supabase.auth.getSession();
-        if (!sess.session) {
-          const { error } = await supabase.auth.signInAnonymously();
-          if (error) throw error;
-        }
         const { data, error } = await supabase
           .from("chat_history")
           .select("id, message_role, message_text, created_at")
@@ -53,15 +62,32 @@ export default function CoachChat() {
         setReady(true);
       }
     })();
-  }, []);
+  }, [authLoading, locked]);
 
   useEffect(() => {
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
+  const contextPayload = useMemo(
+    () => ({
+      display_name: profile?.display_name ?? profile?.email?.split("@")[0] ?? "Warrior",
+      language: profile?.preferred_language ?? "en",
+      bmi: profile?.bmi ?? null,
+      bmi_category: profile?.bmi_category ?? null,
+      chosen_character: profile?.chosen_character ?? "Kratos",
+      tier,
+      intensity,
+    }),
+    [profile, tier, intensity],
+  );
+
   async function send(text: string) {
     const content = text.trim();
     if (!content || sending) return;
+    if (locked) {
+      toast.error("Upgrade to PRO or ULTRA to chat with the Coach.");
+      return;
+    }
     setSending(true);
     const userMsg: Msg = { id: crypto.randomUUID(), role: "user", text: content };
     const placeholder: Msg = { id: crypto.randomUUID(), role: "assistant", text: "", pending: true };
@@ -71,7 +97,7 @@ export default function CoachChat() {
 
     try {
       const { data, error } = await supabase.functions.invoke("chat-coach", {
-        body: { message: content },
+        body: { message: content, context: contextPayload },
       });
       if (error) throw error;
       const reply = (data as { reply?: string })?.reply ?? "(no response)";
@@ -126,8 +152,12 @@ export default function CoachChat() {
               <Dumbbell className="h-4 w-4 text-emerald-400" />
             </div>
             <div className="leading-tight">
-              <div className="font-display text-lg tracking-wider text-white">AI COACH</div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-400">online · zero excuses</div>
+              <div className="font-display text-lg tracking-wider text-white">
+                {contextPayload.chosen_character.toUpperCase()}
+              </div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-400">
+                online · tier {tier.toUpperCase()} · {intensity.replace("_", " ")}
+              </div>
             </div>
           </div>
         </header>
@@ -135,8 +165,18 @@ export default function CoachChat() {
         {/* Messages */}
         <div
           ref={scrollerRef}
-          className="flex-1 overflow-y-auto rounded-sm border border-emerald-500/20 bg-black/55 p-3 sm:p-5 shadow-[0_0_40px_rgba(0,0,0,0.6)]"
+          className="relative flex-1 overflow-y-auto rounded-sm border border-emerald-500/20 bg-black/55 p-3 sm:p-5 shadow-[0_0_40px_rgba(0,0,0,0.6)]"
         >
+          {locked && (
+            <TierLock
+              message={
+                !isAuthed
+                  ? "Sign in and upgrade to PRO or ULTRA to unlock the Council."
+                  : "Weakness Detected. Upgrade to PRO or ULTRA to unlock the Council."
+              }
+              onUpgrade={() => nav(isAuthed ? "/#pricing" : "/auth")}
+            />
+          )}
           {!ready && <div className="py-10 text-center text-sm text-zinc-500">Loading history…</div>}
 
           {ready && messages.length === 0 && (
@@ -165,6 +205,28 @@ export default function CoachChat() {
               <Bubble key={m.id} msg={m} />
             ))}
           </ul>
+        </div>
+
+        {/* Intensity rail */}
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {([
+            { id: "easy", label: "Easy", icon: <Dumbbell className="h-3.5 w-3.5" /> },
+            { id: "hard", label: "Hard", icon: <Flame className="h-3.5 w-3.5" /> },
+            { id: "level_up", label: "LEVEL UP 🔥", icon: <Zap className="h-3.5 w-3.5" /> },
+          ] as { id: Intensity; label: string; icon: JSX.Element }[]).map((opt) => (
+            <button
+              key={opt.id}
+              disabled={locked}
+              onClick={() => setIntensity(opt.id)}
+              className={`inline-flex items-center justify-center gap-1.5 border px-2 py-2 font-mono-tech text-[10px] uppercase tracking-widest transition disabled:opacity-40 ${
+                intensity === opt.id
+                  ? "border-emerald-400 bg-emerald-400/15 text-emerald-300"
+                  : "border-zinc-700 bg-black/50 text-zinc-300 hover:border-emerald-400 hover:text-emerald-300"
+              }`}
+            >
+              {opt.icon} {opt.label}
+            </button>
+          ))}
         </div>
 
         {/* Composer */}
@@ -202,14 +264,14 @@ export default function CoachChat() {
                   send(input);
                 }
               }}
-              placeholder="Demand your routine…"
+              placeholder={locked ? "Locked — upgrade to chat" : "Demand your routine…"}
               rows={1}
               className="max-h-40 min-h-[2.5rem] flex-1 resize-none rounded-sm border border-zinc-700 bg-black/70 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-emerald-400 focus:outline-none"
-              disabled={!ready || sending}
+              disabled={!ready || sending || locked}
             />
             <button
               type="submit"
-              disabled={!ready || sending || !input.trim()}
+              disabled={!ready || sending || !input.trim() || locked}
               className="grid h-10 w-10 shrink-0 place-items-center rounded-sm bg-emerald-500 text-black shadow-[0_0_18px_rgba(16,185,129,0.55)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Send"
             >
