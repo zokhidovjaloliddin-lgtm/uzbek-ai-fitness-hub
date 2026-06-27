@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, X } from "lucide-react";
 import { storage } from "@/lib/storage";
 import { toast } from "sonner";
 
 const STORAGE_KEY = "absolute_frame_flash_seen";
+const DEADLINE_KEY = "absolute_frame_flash_deadline";
+const TIMER_SECONDS = 5 * 60;
 
 function fmt(s: number) {
   const m = Math.floor(s / 60).toString().padStart(2, "0");
@@ -15,26 +17,36 @@ function fmt(s: number) {
 export default function FlashDiscount({
   open,
   onClose,
+  onPurchased,
 }: {
   open: boolean;
   onClose: () => void;
+  onPurchased?: () => void;
 }) {
-  const [secs, setSecs] = useState(300);
+  // Use an absolute deadline stored in localStorage so the timer NEVER resets
+  // across remounts, re-opens, or clicks. It only starts once on first display.
+  const [secs, setSecs] = useState<number>(() => readRemaining());
+  const ivRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!open) return;
-    setSecs(300);
-    const iv = window.setInterval(() => {
-      setSecs((s) => (s > 0 ? s - 1 : 0));
-    }, 1000);
-    return () => window.clearInterval(iv);
-  }, [open]);
+    // Lazily initialize the deadline the very first time the timer is shown.
+    if (!localStorage.getItem(DEADLINE_KEY)) {
+      localStorage.setItem(DEADLINE_KEY, String(Date.now() + TIMER_SECONDS * 1000));
+    }
+    const tick = () => setSecs(readRemaining());
+    tick();
+    ivRef.current = window.setInterval(tick, 1000);
+    return () => {
+      if (ivRef.current !== null) window.clearInterval(ivRef.current);
+    };
+  }, []);
 
   const claim = () => {
     storage.setTier("premium");
     storage.addSub("premium");
     localStorage.setItem(STORAGE_KEY, "1");
-    toast.success("PRO unlocked at 30,000 UZS. Boriku, brat.");
+    toast.success("Pro membership activated.");
+    onPurchased?.();
     onClose();
   };
 
@@ -72,10 +84,10 @@ export default function FlashDiscount({
                 <Zap className="h-7 w-7 text-yellow-300" fill="currentColor" />
               </motion.div>
               <div className="font-display text-3xl tracking-wider text-white">
-                INSANE LUCK DETECTED! ⚡
+                STRATEGIC ADVANTAGE ACTIVATED
               </div>
               <div className="mt-1 font-mono-tech text-[11px] uppercase tracking-widest text-white/90">
-                70% SPECIAL DISCOUNT UNLOCKED
+                EXCLUSIVE 70% TIER UNLOCKED
               </div>
             </div>
             <div className="p-6">
@@ -104,7 +116,7 @@ export default function FlashDiscount({
                 disabled={secs === 0}
                 className="mt-5 w-full bg-crimson px-6 py-4 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground transition hover:bg-primary-glow disabled:opacity-40"
               >
-                {secs === 0 ? "Offer Expired" : "Claim 70% OFF — Activate PRO"}
+                {secs === 0 ? "Offer Expired" : "Activate Pro — 70% Tier"}
               </button>
               <button
                 onClick={onClose}
