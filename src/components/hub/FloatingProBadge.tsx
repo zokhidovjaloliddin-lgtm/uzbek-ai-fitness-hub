@@ -1,6 +1,13 @@
 import { Flame } from "lucide-react";
 
-export default function FloatingProBadge({ onClick }: { onClick: () => void }) {
+export default function FloatingProBadge({
+  onClick,
+  visible = true,
+}: {
+  onClick: () => void;
+  visible?: boolean;
+}) {
+  if (!visible) return null;
   return (
     <button
       onClick={onClick}
