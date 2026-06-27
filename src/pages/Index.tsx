@@ -17,6 +17,17 @@ import { getActiveTier } from "@/lib/storage";
 const Index = () => {
   const [flashOpen, setFlashOpen] = useState(false);
   const { profile } = useAuth();
+  // Bump on local tier mutations so useMemo re-evaluates.
+  const [tierTick, setTierTick] = useState(0);
+  useEffect(() => {
+    const onChange = () => setTierTick((n) => n + 1);
+    window.addEventListener("frame:tier-changed", onChange);
+    window.addEventListener("storage", onChange);
+    return () => {
+      window.removeEventListener("frame:tier-changed", onChange);
+      window.removeEventListener("storage", onChange);
+    };
+  }, []);
 
   // Tier evaluation guard — only Free-tier users see the promo. Reads both
   // the authenticated profile and the local vault mirror used by the Cheat
@@ -26,7 +37,7 @@ const Index = () => {
     if (profileTier && profileTier !== "free") return false;
     if (getActiveTier() !== "standard") return false;
     return true;
-  }, [profile?.membership_tier]);
+  }, [profile?.membership_tier, tierTick]);
 
   // Auto-open the discount modal 3s after first onboarding pass.
   useEffect(() => {
