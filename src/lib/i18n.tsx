@@ -1,16 +1,18 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-export type Lang = "en" | "uz";
+export type Lang = "en" | "uz" | "ru";
 
-type Dict = Record<string, { en: string; uz: string }>;
+type Entry = { en: string; uz: string; ru?: string };
+type Dict = Record<string, Entry>;
 
 export const T: Dict = {
   // Onboarding / Auth
   onb_pick_language: { en: "Choose your language", uz: "Tilni tanlang" },
   onb_english: { en: "English", uz: "Ingliz tili" },
   onb_uzbek: { en: "O'zbek", uz: "O'zbek" },
+  onb_russian: { en: "Russian", uz: "Rus tili", ru: "Русский" },
   onb_welcome_title: { en: "Welcome, Warrior", uz: "Xush kelibsiz, Bahodir" },
-  onb_welcome_sub: { en: "Yujiro, Kratos, Khabib, Khamzat — the council is waiting.", uz: "Yujiro, Kratos, Xabib, Hamzat — kengash kutmoqda." },
+  onb_welcome_sub: { en: "Yujiro, Kratos, Khabib, Khamzat — the council is waiting.", uz: "Yujiro, Kratos, Xabib, Hamzat — kengash sizni kutmoqda." },
   onb_get_started: { en: "Let's Get Started", uz: "Boshlaymiz" },
   auth_sign_in: { en: "Sign In", uz: "Kirish" },
   auth_sign_up: { en: "Sign Up", uz: "Ro'yxatdan o'tish" },
