@@ -53,6 +53,13 @@ export default function OnboardingGate() {
                 <span>{t("onb_uzbek")}</span>
                 <ArrowRight className="h-4 w-4 opacity-50 transition group-hover:translate-x-1 group-hover:opacity-100" />
               </button>
+              <button
+                onClick={() => { setLang("ru"); setStep("welcome"); }}
+                className="group flex items-center justify-between border border-border bg-card px-5 py-4 font-mono-tech uppercase tracking-widest transition hover:border-crimson hover:bg-crimson/10"
+              >
+                <span>{t("onb_russian")}</span>
+                <ArrowRight className="h-4 w-4 opacity-50 transition group-hover:translate-x-1 group-hover:opacity-100" />
+              </button>
             </div>
           </motion.div>
         ) : (

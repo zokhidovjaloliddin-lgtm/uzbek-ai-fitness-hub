@@ -32,7 +32,10 @@ export const storage = {
   getTier(): string {
     return localStorage.getItem(KEY_TIER) ?? "standard";
   },
-  setTier(t: string) { localStorage.setItem(KEY_TIER, t); },
+  setTier(t: string) {
+    localStorage.setItem(KEY_TIER, t);
+    try { window.dispatchEvent(new CustomEvent("frame:tier-changed")); } catch { /* ignore */ }
+  },
 
   /** Set of tier ids the user has actively subscribed to (paid). */
   getSubs(): string[] {
@@ -43,6 +46,7 @@ export const storage = {
     if (!cur.includes(id)) {
       cur.push(id);
       localStorage.setItem(KEY_SUBS, JSON.stringify(cur));
+      try { window.dispatchEvent(new CustomEvent("frame:tier-changed")); } catch { /* ignore */ }
     }
   },
 };

@@ -38,7 +38,7 @@ const TIERS: Tier[] = [
     name: "Premium",
     price: "10,000",
     priceLabel: "UZS / month",
-    tagline: "Aka, ready to go beast mode.",
+    tagline: "Ready to step into elite mode.",
     highlighted: true,
     features: [
       { ok: true, text: "Everything in Standard" },
@@ -285,7 +285,7 @@ const Pricing = () => {
                   </motion.div>
                   <div className="mt-4 font-display text-3xl">Payment Complete</div>
                   <div className="mt-1 font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">
-                    {payTier.name} tier activated. Boriku, brat!
+                    {payTier.name} tier activated.
                   </div>
                   <button onClick={closeModal} className="mt-6 w-full bg-foreground px-6 py-3 font-mono-tech text-xs uppercase tracking-widest text-background hover:opacity-90">
                     Enter the Arena

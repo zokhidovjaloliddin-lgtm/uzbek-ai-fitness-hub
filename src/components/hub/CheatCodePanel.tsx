@@ -36,7 +36,7 @@ export default function CheatCodePanel() {
   const current: Tier = (profile?.membership_tier as Tier) ?? "free";
 
   return (
-    <div className="fixed bottom-5 right-5 z-[95]">
+    <div className="fixed bottom-20 right-5 z-[95]">
       <AnimatePresence>
         {open && (
           <motion.div

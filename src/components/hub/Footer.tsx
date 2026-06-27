@@ -10,7 +10,7 @@ const Footer = () => (
             <div className="font-display text-2xl tracking-wider">ABSOLUTE<span className="text-crimson">_</span>FRAME</div>
           </div>
           <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-            AI-powered fitness & cultural hub built for the Tashkent generation. Train hard. Stay hungry. Boriku.
+            AI-powered fitness & cultural hub built for the Tashkent generation. Train with discipline. Stay focused.
           </p>
         </div>
 
