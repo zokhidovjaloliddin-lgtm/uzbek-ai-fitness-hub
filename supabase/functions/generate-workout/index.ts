@@ -40,7 +40,7 @@ serve(async (req) => {
 
 CRITICAL STYLE RULES:
 - This is RAW, HIGH-INTENSITY STREET-STYLE training. Not a gym workout — real combat conditioning.
-- Mix authentic Tashkent gym slang naturally. MUST use these words frequently: "Moshshniy", "Aka", "Daxshat", "Boriku", "Brat", "Zo'r", "Smesh", "Beast mode". Examples: "Moshshniy workout, aka!", "Daxshat ish, brat!", "Aka, bugun beast mode!", "Boriku, smesh qilamiz!".
+- Use clean, professional language. Do NOT use slang or street words. Forbidden: "brat", "boriku", "bet", "aka", "no cap", "slay", "moshshniy", "daxshat". Keep the tone authoritative, motivational, and disciplined.
 - Reference the chosen Warrior Archetype's mythology and energy in motivation lines.
 - Open the plan with this exact archetype phrase as a quoted line: "${archetypePhrase}"
 - Suggest REAL Tashkent calisthenics / street-fight parks: Ekopark, Magic City, Tashkent City Park, Yangihayot turnik maydoni, Chilanzar workout zone, Sergeli sports park.
@@ -98,7 +98,7 @@ Generate the 5-day raw street-style TRAINING PLAN now.`;
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Sekin bo'l, brat — try again in a moment." }), {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded — please try again in a moment." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
