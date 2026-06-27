@@ -50,16 +50,16 @@ const Navbar = () => {
         </nav>
         <div className="flex items-center gap-3">
           <div className="inline-flex items-center border border-border font-mono-tech text-[11px] uppercase tracking-widest">
-            <button
-              onClick={() => setLang("en")}
-              className={`px-2.5 py-1 transition ${lang === "en" ? "bg-crimson text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              aria-pressed={lang === "en"}
-            >EN</button>
-            <button
-              onClick={() => setLang("uz")}
-              className={`px-2.5 py-1 transition ${lang === "uz" ? "bg-crimson text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              aria-pressed={lang === "uz"}
-            >UZ</button>
+            {(["en", "uz", "ru"] as const).map((code) => (
+              <button
+                key={code}
+                onClick={() => setLang(code)}
+                className={`px-2.5 py-1 transition ${lang === code ? "bg-crimson text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                aria-pressed={lang === code}
+              >
+                {code.toUpperCase()}
+              </button>
+            ))}
           </div>
           <AuthBar />
         </div>
