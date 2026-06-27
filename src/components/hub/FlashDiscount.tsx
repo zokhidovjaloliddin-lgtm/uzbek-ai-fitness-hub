@@ -14,6 +14,13 @@ function fmt(s: number) {
   return `${m}:${ss}`;
 }
 
+function readRemaining(): number {
+  const raw = localStorage.getItem(DEADLINE_KEY);
+  if (!raw) return TIMER_SECONDS;
+  const remaining = Math.floor((Number(raw) - Date.now()) / 1000);
+  return Math.max(0, Math.min(TIMER_SECONDS, remaining));
+}
+
 export default function FlashDiscount({
   open,
   onClose,
