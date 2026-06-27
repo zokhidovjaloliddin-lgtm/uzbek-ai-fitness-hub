@@ -208,14 +208,14 @@ const AICoach = () => {
   const clearPlan = () => {
     setPlan("");
     localStorage.removeItem("absolute_frame_plan");
-    toast.message("Vault cleared. Aka, qayta boshlaymiz.");
+    toast.message("Vault cleared.");
   };
 
   const copyPlan = async () => {
     if (!plan) return;
     try {
       await navigator.clipboard.writeText(plan);
-      toast.success("Moshshniy! Reja nusxalandi.");
+      toast.success("Training plan copied.");
     } catch {
       toast.error("Clipboard unavailable on this device.");
     }
