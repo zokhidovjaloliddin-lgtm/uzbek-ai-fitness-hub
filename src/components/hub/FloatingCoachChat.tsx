@@ -27,7 +27,7 @@ const STATUS_LINE: Record<string, string> = {
 };
 
 export default function FloatingCoachChat() {
-  const { isAuthed, user, profile } = useAuth();
+  const { profile } = useAuth();
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
