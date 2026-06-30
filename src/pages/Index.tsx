@@ -11,6 +11,7 @@ import FlashDiscount, { hasSeenFlash, markFlashSeen } from "@/components/hub/Fla
 import FloatingProBadge from "@/components/hub/FloatingProBadge";
 import CheatCodePanel from "@/components/hub/CheatCodePanel";
 import FloatingCoachChat from "@/components/hub/FloatingCoachChat";
+import UltraBanner from "@/components/hub/UltraBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { getActiveTier } from "@/lib/storage";
 
@@ -39,6 +40,12 @@ const Index = () => {
     return true;
   }, [profile?.membership_tier, tierTick]);
 
+  // Ultra tier activates the Yujiro Hanma / Demon Back aesthetic globally.
+  const isUltraTier = useMemo(() => {
+    if (profile?.membership_tier === "ultra") return true;
+    return getActiveTier() === "ultra";
+  }, [profile?.membership_tier, tierTick]);
+
   // Auto-open the discount modal 3s after first onboarding pass.
   useEffect(() => {
     if (hasSeenFlash()) return;
@@ -56,8 +63,9 @@ const Index = () => {
   }, [isFreeTier, flashOpen]);
 
   return (
-    <>
+    <div className={isUltraTier ? "ultra-mode" : ""}>
       <OnboardingGate />
+      {isUltraTier && <UltraBanner />}
       <main className="min-h-screen bg-background text-foreground pb-16">
         <Navbar />
         <h1 className="sr-only">Absolute Frame — AI Fitness & Cultural Hub for Tashkent</h1>
@@ -78,7 +86,7 @@ const Index = () => {
       <FloatingProBadge visible={isFreeTier} onClick={() => setFlashOpen(true)} />
       <CheatCodePanel />
       <FloatingCoachChat />
-    </>
+    </div>
   );
 };
 

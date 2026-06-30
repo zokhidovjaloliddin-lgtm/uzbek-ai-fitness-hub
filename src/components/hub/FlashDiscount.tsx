@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 const STORAGE_KEY = "absolute_frame_flash_seen";
 const DEADLINE_KEY = "absolute_frame_flash_deadline";
+const CLAIMED_KEY = "absolute_frame_flash_claimed";
 const TIMER_SECONDS = 5 * 60;
 
 function fmt(s: number) {
@@ -19,6 +20,16 @@ function readRemaining(): number {
   if (!raw) return TIMER_SECONDS;
   const remaining = Math.floor((Number(raw) - Date.now()) / 1000);
   return Math.max(0, Math.min(TIMER_SECONDS, remaining));
+}
+
+/** Public helper: is the 70% Flash Discount still live right now? */
+export function isFlashDiscountActive(): boolean {
+  const raw = localStorage.getItem(DEADLINE_KEY);
+  if (!raw) return true; // Not started yet → still claimable.
+  return Number(raw) - Date.now() > 0;
+}
+export function hasClaimedFlash(): boolean {
+  return localStorage.getItem(CLAIMED_KEY) === "1";
 }
 
 export default function FlashDiscount({
@@ -52,6 +63,8 @@ export default function FlashDiscount({
     storage.setTier("premium");
     storage.addSub("premium");
     localStorage.setItem(STORAGE_KEY, "1");
+    localStorage.setItem(CLAIMED_KEY, "1");
+    try { window.dispatchEvent(new CustomEvent("frame:discount-claimed")); } catch { /* ignore */ }
     toast.success("Pro membership activated.");
     onPurchased?.();
     onClose();

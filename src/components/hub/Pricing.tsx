@@ -5,6 +5,7 @@ import { storage } from "@/lib/storage";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
 import { useLang } from "@/lib/i18n";
+import { isFlashDiscountActive } from "./FlashDiscount";
 
 type Tier = {
   id: string;
@@ -88,12 +89,39 @@ const Pricing = () => {
   const [payTier, setPayTier] = useState<Tier | null>(null);
   const [paying, setPaying] = useState<"idle" | "processing" | "done">("idle");
   const [method, setMethod] = useState<"payme" | "click">("payme");
+  // Re-render whenever a global tier/discount event fires so the cards stay
+  // perfectly in sync with the floating discount + cheat code panel.
+  const [, setTick] = useState(0);
 
   // Restore last subscription tier + subscribed list from localStorage.
   useEffect(() => {
-    setActiveTier(storage.getTier());
-    setSubs(storage.getSubs());
+    const sync = () => {
+      setActiveTier(storage.getTier());
+      setSubs(storage.getSubs());
+      setTick((n) => n + 1);
+    };
+    sync();
+    window.addEventListener("frame:tier-changed", sync);
+    window.addEventListener("frame:discount-claimed", sync);
+    window.addEventListener("storage", sync);
+    const iv = window.setInterval(sync, 1000); // keeps the discount countdown live
+    return () => {
+      window.removeEventListener("frame:tier-changed", sync);
+      window.removeEventListener("frame:discount-claimed", sync);
+      window.removeEventListener("storage", sync);
+      window.clearInterval(iv);
+    };
   }, []);
+
+  // 70% off promo is only meaningful while the timer is still alive AND the
+  // user is still on the Free tier. Once they own anything, prices snap back.
+  const discountActive = isFlashDiscountActive() && activeTier === "standard" && !subs.length;
+  const applyDiscount = (price: string) => {
+    if (!discountActive) return null;
+    const num = Number(price.replace(/[^\d]/g, ""));
+    if (!num) return null;
+    return Math.round(num * 0.3).toLocaleString();
+  };
 
   const accountLabel = (activeTier ?? "standard").toUpperCase();
 
@@ -154,6 +182,7 @@ const Pricing = () => {
             const isSubscribed = subs.includes(tier.id);
             const isActiveFree = tier.free && activeTier === tier.id;
             const locked = isSubscribed || isActiveFree;
+            const discounted = !locked ? applyDiscount(tier.price) : null;
             return (
               <motion.div
                 key={tier.id}
@@ -174,14 +203,26 @@ const Pricing = () => {
                 )}
                 {locked && (
                   <div className="absolute right-4 top-4 inline-flex items-center gap-1 border border-gauge-normal px-2 py-0.5 font-mono-tech text-[10px] uppercase tracking-widest text-gauge-normal">
-                    <ShieldCheck className="h-3 w-3" /> Active
+                    <ShieldCheck className="h-3 w-3" /> OWNED
+                  </div>
+                )}
+                {discounted && tier.highlighted && (
+                  <div className="absolute -top-3 right-6 bg-yellow-400 px-2 py-1 font-mono-tech text-[10px] uppercase tracking-widest text-black">
+                    70% OFF
                   </div>
                 )}
                 <div className="font-display text-3xl">{tier.name}</div>
                 <div className="mt-1 font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">{tier.tagline}</div>
 
-                <div className="mt-6 flex items-baseline gap-2">
-                  <div className="font-display text-6xl text-crimson">{tier.price}</div>
+                <div className="mt-6 flex items-baseline gap-2 flex-wrap">
+                  {discounted ? (
+                    <>
+                      <div className="font-display text-3xl text-muted-foreground line-through">{tier.price}</div>
+                      <div className="font-display text-6xl text-crimson">{discounted}</div>
+                    </>
+                  ) : (
+                    <div className="font-display text-6xl text-crimson">{tier.price}</div>
+                  )}
                   <div className="font-mono-tech text-xs uppercase tracking-widest text-muted-foreground">{tier.priceLabel}</div>
                 </div>
 
@@ -208,14 +249,10 @@ const Pricing = () => {
                   }`}
                 >
                   {locked
-                    ? (tier.id === "ultra"
-                        ? t("pr_already_elite")
-                        : tier.id === "premium"
-                          ? t("pr_already_pro")
-                          : t("pr_already_free"))
+                    ? "OWNED"
                     : tier.free
                       ? t("pr_activate_free")
-                      : `${t("pr_subscribe")} — ${tier.price} UZS`}
+                      : `${t("pr_subscribe")} — ${discounted ?? tier.price} UZS`}
                 </button>
               </motion.div>
             );

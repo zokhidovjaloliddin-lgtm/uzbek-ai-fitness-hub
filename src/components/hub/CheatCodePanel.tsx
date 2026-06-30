@@ -14,8 +14,13 @@ export default function CheatCodePanel() {
 
   async function setTier(tier: Tier) {
     // Local mirror so non-authed users (and AICoach which reads storage) react.
-    storage.setTier(tier === "pro" ? "premium" : tier === "ultra" ? "ultra" : "standard");
-    if (tier !== "free") storage.addSub(tier === "pro" ? "premium" : "ultra");
+    // Rebuild subs from scratch so DOWNGRADES (ultra → free, ultra → pro) actually
+    // take effect — addSub-only would leave the previous tier active forever.
+    const tierKey = tier === "pro" ? "premium" : tier === "ultra" ? "ultra" : "standard";
+    storage.setTier(tierKey);
+    if (tier === "ultra") storage.setSubs(["premium", "ultra"]);
+    else if (tier === "pro") storage.setSubs(["premium"]);
+    else storage.setSubs([]);
 
     if (isAuthed && user && profile) {
       const { error } = await supabase

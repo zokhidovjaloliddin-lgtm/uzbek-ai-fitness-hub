@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Send, X, Sparkles, Lock } from "lucide-react";
+import { MessageSquare, Send, X, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +27,7 @@ const STATUS_LINE: Record<string, string> = {
 };
 
 export default function FloatingCoachChat() {
-  const { isAuthed, user, profile } = useAuth();
+  const { profile } = useAuth();
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -58,10 +58,6 @@ export default function FloatingCoachChat() {
   async function send(content: string) {
     const text = content.trim();
     if (!text || sending) return;
-    if (!isAuthed || !user) {
-      toast.error("Sign in to chat with the AI Coach.");
-      return;
-    }
     setSending(true);
     const userMsg: Msg = { id: crypto.randomUUID(), role: "user", text };
     const placeholder: Msg = { id: crypto.randomUUID(), role: "assistant", text: "", pending: true };
@@ -132,13 +128,7 @@ export default function FloatingCoachChat() {
               ref={scrollerRef}
               className="flex-1 space-y-3 overflow-y-auto bg-black/60 p-3"
             >
-              {!isAuthed && (
-                <div className="grid place-items-center gap-2 py-10 text-center text-xs text-zinc-400">
-                  <Lock className="h-6 w-6 text-crimson" />
-                  <div>Sign in to start chatting with the AI Coach.</div>
-                </div>
-              )}
-              {isAuthed && messages.length === 0 && (
+              {messages.length === 0 && (
                 <div className="grid place-items-center gap-2 py-10 text-center text-xs text-zinc-400">
                   <Sparkles className="h-6 w-6 text-crimson" />
                   <div className="font-mono-tech uppercase tracking-widest">
@@ -173,13 +163,13 @@ export default function FloatingCoachChat() {
                   }
                 }}
                 rows={1}
-                placeholder={isAuthed ? "Ask the AI Coach..." : "Sign in to chat"}
-                disabled={!isAuthed || sending}
+                placeholder="Ask the AI Coach..."
+                disabled={sending}
                 className="max-h-32 min-h-[2.5rem] flex-1 resize-none rounded-sm border border-zinc-700 bg-black/70 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-crimson focus:outline-none disabled:opacity-50"
               />
               <button
                 type="submit"
-                disabled={!isAuthed || sending || !input.trim()}
+                disabled={sending || !input.trim()}
                 className="grid h-10 w-10 shrink-0 place-items-center bg-crimson text-white shadow-[0_0_18px_rgba(220,38,38,0.55)] transition hover:bg-primary-glow disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Send"
               >
