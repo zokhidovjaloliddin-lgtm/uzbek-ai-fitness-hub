@@ -49,6 +49,11 @@ export const storage = {
       try { window.dispatchEvent(new CustomEvent("frame:tier-changed")); } catch { /* ignore */ }
     }
   },
+  /** Replace the entire subs list (used by Cheat Code tier overrides). */
+  setSubs(list: string[]) {
+    localStorage.setItem(KEY_SUBS, JSON.stringify(list));
+    try { window.dispatchEvent(new CustomEvent("frame:tier-changed")); } catch { /* ignore */ }
+  },
 };
 
 /**
