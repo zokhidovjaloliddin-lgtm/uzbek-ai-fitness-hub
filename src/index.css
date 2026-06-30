@@ -156,3 +156,54 @@
     96% { transform: translate(-1px, 0); opacity: 0.5; }
   }
 }
+
+/* ============================================================
+   ULTRA · YUJIRO HANMA / DEMON BACK MODE
+   Activated by wrapping a section in `.ultra-mode`. The whole
+   UI shifts to obsidian black + pulsating blood crimson, with
+   scanlines, vignette glow, and aggressive border treatments.
+   ============================================================ */
+@layer utilities {
+  .ultra-mode {
+    --primary: 0 95% 45%;
+    --primary-glow: 0 100% 58%;
+    --border: 0 70% 22%;
+    --background: 0 0% 0%;
+    --card: 0 30% 4%;
+    --muted: 0 40% 6%;
+    background:
+      radial-gradient(ellipse at top, hsl(0 80% 10% / 0.55), transparent 60%),
+      radial-gradient(ellipse at bottom, hsl(0 90% 14% / 0.45), transparent 70%),
+      #000;
+    animation: demon-pulse 3.4s ease-in-out infinite;
+  }
+  .ultra-mode::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 2px, hsl(0 100% 50% / 0.035) 2px 3px),
+      radial-gradient(ellipse at center, transparent 40%, hsl(0 0% 0% / 0.85) 100%);
+    mix-blend-mode: screen;
+  }
+  .ultra-mode .bg-card { background-color: hsl(0 60% 4%) !important; }
+  .ultra-mode .bg-noir { background-color: hsl(0 0% 1%) !important; }
+  .ultra-mode .text-crimson { color: hsl(0 100% 55%); text-shadow: 0 0 12px hsl(0 100% 50% / 0.7); }
+  .ultra-mode .shadow-crimson { box-shadow: 0 0 60px hsl(0 100% 50% / 0.55), inset 0 0 30px hsl(0 0% 0% / 0.7); }
+  .ultra-mode button, .ultra-mode .border-border { border-color: hsl(0 80% 20%); }
+
+  @keyframes demon-pulse {
+    0%, 100% { filter: saturate(1) contrast(1); }
+    50% { filter: saturate(1.35) contrast(1.1); }
+  }
+
+  .demon-banner {
+    position: relative;
+    background: linear-gradient(90deg, #000 0%, hsl(0 80% 14%) 50%, #000 100%);
+    border-top: 2px solid hsl(0 100% 50%);
+    border-bottom: 2px solid hsl(0 100% 50%);
+    box-shadow: 0 0 40px hsl(0 100% 50% / 0.6), inset 0 0 40px hsl(0 0% 0% / 0.8);
+    animation: demon-pulse 2.4s ease-in-out infinite;
+  }
+}
