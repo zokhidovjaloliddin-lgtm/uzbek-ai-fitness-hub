@@ -86,40 +86,46 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
-    const authed = createClient(SUPABASE_URL, ANON, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
-    const { data: userData, error: userErr } = await authed.auth.getUser();
-    if (userErr || !userData.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // Anonymous chat is allowed. If a JWT is present we persist history per
+    // user; otherwise we skip persistence and answer statelessly.
+    let user_id: string | null = null;
+    if (token) {
+      try {
+        const authed = createClient(SUPABASE_URL, ANON, {
+          global: { headers: { Authorization: `Bearer ${token}` } },
+        });
+        const { data: userData } = await authed.auth.getUser();
+        user_id = userData?.user?.id ?? null;
+      } catch { user_id = null; }
     }
-    const user_id = userData.user.id;
 
     const { message, context } = await req.json();
     if (!message || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "message required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const admin = createClient(SUPABASE_URL, SERVICE);
+    const admin = user_id ? createClient(SUPABASE_URL, SERVICE) : null;
 
-    // Load history (chronological)
-    const { data: history } = await admin
-      .from("chat_history")
-      .select("message_role, message_text")
-      .eq("user_id", user_id)
-      .order("created_at", { ascending: true })
-      .limit(40);
-
-    // Persist user message
-    await admin.from("chat_history").insert({
-      user_id, message_role: "user", message_text: message,
-    });
+    // Load history (chronological) — only when authenticated.
+    let history: { message_role: string; message_text: string }[] = [];
+    if (admin && user_id) {
+      const { data } = await admin
+        .from("chat_history")
+        .select("message_role, message_text")
+        .eq("user_id", user_id)
+        .order("created_at", { ascending: true })
+        .limit(40);
+      history = data ?? [];
+      await admin.from("chat_history").insert({
+        user_id, message_role: "user", message_text: message,
+      });
+    }
 
     const systemPrompt = buildSystem((context ?? {}) as Ctx);
 
     const messages = [
       { role: "system", content: systemPrompt },
-      ...(history ?? []).map((h: { message_role: string; message_text: string }) => ({
+      ...history.map((h: { message_role: string; message_text: string }) => ({
         role: h.message_role, content: h.message_text,
       })),
       { role: "user", content: message },
@@ -149,9 +155,11 @@ serve(async (req) => {
     const data = await resp.json();
     const reply: string = data.choices?.[0]?.message?.content ?? "";
 
-    await admin.from("chat_history").insert({
-      user_id, message_role: "assistant", message_text: reply,
-    });
+    if (admin && user_id) {
+      await admin.from("chat_history").insert({
+        user_id, message_role: "assistant", message_text: reply,
+      });
+    }
 
     return new Response(JSON.stringify({ reply }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
