@@ -177,6 +177,49 @@ export const T: Dict = {
   d_muay: { en: "Muay Thai", uz: "Muay Thai", ru: "Муай-тай" },
   d_street: { en: "Combat Sports", uz: "Jangovar Sport", ru: "Боевые виды спорта" },
   d_cali: { en: "Calisthenics", uz: "Kalisteniks", ru: "Калистеника" },
+  // Funnel
+  fn_back: { en: "Back", uz: "Orqaga", ru: "Назад" },
+  fn_next: { en: "Continue", uz: "Davom etish", ru: "Продолжить" },
+  fn_skip: { en: "Skip for now", uz: "Hozircha o'tkazib yuborish", ru: "Пропустить" },
+  fn_step: { en: "Step", uz: "Qadam", ru: "Шаг" },
+  fn_of: { en: "of", uz: "/", ru: "из" },
+  fn_s1_title: { en: "CHOOSE YOUR LANGUAGE", uz: "TILNI TANLANG", ru: "ВЫБЕРИТЕ ЯЗЫК" },
+  fn_s1_sub: {
+    en: "Every step will be presented in the language you pick here.",
+    uz: "Har bir qadam siz tanlagan tilda taqdim etiladi.",
+    ru: "Каждый шаг будет представлен на выбранном вами языке.",
+  },
+  fn_s2_title: { en: "WHAT DO YOU TRAIN FOR?", uz: "NIMA UCHUN MASHQ QILASIZ?", ru: "ДЛЯ ЧЕГО ВЫ ТРЕНИРУЕТЕСЬ?" },
+  fn_s2_sub: {
+    en: "Pick the discipline path that fits your mission.",
+    uz: "Missiyangizga mos yo'nalishni tanlang.",
+    ru: "Выберите путь дисциплины, соответствующий вашей цели.",
+  },
+  fn_d_mma: { en: "MMA", uz: "MMA", ru: "ММА" },
+  fn_d_cali: { en: "Calisthenics", uz: "Kalisteniks", ru: "Калистеника" },
+  fn_d_mixed: { en: "Mixed All", uz: "Aralash Barchasi", ru: "Смешанное всё" },
+  fn_d_power: { en: "Everything for Power", uz: "Kuch uchun Hammasi", ru: "Всё ради силы" },
+  fn_s3_title: { en: "BODY METRICS", uz: "TANA KO'RSATKICHLARI", ru: "МЕТРИКИ ТЕЛА" },
+  fn_s3_sub: {
+    en: "Log your BMI and stats. Signing in is optional — you can skip and continue.",
+    uz: "BMI va ma'lumotlaringizni kiriting. Kirish ixtiyoriy — o'tkazib yuborishingiz mumkin.",
+    ru: "Введите BMI и данные. Вход опционален — можно пропустить.",
+  },
+  fn_s3_google: { en: "Sign up with Google to save progress", uz: "Progressni saqlash uchun Google orqali kiring", ru: "Войти через Google, чтобы сохранить прогресс" },
+  fn_s3_optional: { en: "Optional — you can skip this step.", uz: "Ixtiyoriy — o'tkazib yuborishingiz mumkin.", ru: "Опционально — можно пропустить." },
+  fn_s4_title: { en: "CHOOSE YOUR ARCHITECT", uz: "ARXITEKTORINGIZNI TANLANG", ru: "ВЫБЕРИТЕ АРХИТЕКТОРА" },
+  fn_s4_sub: {
+    en: "Your paradigm shapes the training plan.",
+    uz: "Sizning paradigmangiz mashg'ulot rejasini shakllantiradi.",
+    ru: "Ваша парадигма формирует план тренировок.",
+  },
+  fn_s5_title: { en: "MANDATORY BRIEFING", uz: "MAJBURIY BRIFING", ru: "ОБЯЗАТЕЛЬНЫЙ БРИФИНГ" },
+  fn_s5_sub: {
+    en: "Watch the edit. Absorb the discipline. Then enter the arena.",
+    uz: "Videoni tomosha qiling. Intizomni qabul qiling. So'ng arenaga kiring.",
+    ru: "Посмотрите видео. Впитайте дисциплину. Затем войдите на арену.",
+  },
+  fn_s5_enter: { en: "ENTER THE ARENA", uz: "ARENAGA KIRISH", ru: "ВОЙТИ НА АРЕНУ" },
 };
 
 type Ctx = {
