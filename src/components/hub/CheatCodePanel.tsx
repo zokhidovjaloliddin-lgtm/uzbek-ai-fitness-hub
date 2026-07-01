@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, ChevronDown, ChevronUp, Crown } from "lucide-react";
+import { Code2, Crown, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { storage } from "@/lib/storage";
@@ -41,17 +41,26 @@ export default function CheatCodePanel() {
   const current: Tier = (profile?.membership_tier as Tier) ?? "free";
 
   return (
-    <div className="fixed bottom-20 right-5 z-[95]">
+    <div className="fixed top-20 right-3 sm:right-4 z-[95]">
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            initial={{ opacity: 0, y: -6, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.96 }}
-            className="mb-2 w-64 border-2 border-yellow-400/70 bg-black/95 p-3 shadow-[0_0_24px_rgba(252,211,77,0.4)]"
+            exit={{ opacity: 0, y: -6, scale: 0.96 }}
+            className="absolute right-0 top-11 w-60 rounded-xl border border-yellow-400/60 bg-black/95 p-3 shadow-[0_0_24px_rgba(252,211,77,0.35)] backdrop-blur-md"
           >
-            <div className="mb-2 flex items-center gap-2 font-mono-tech text-[10px] uppercase tracking-widest text-yellow-300">
-              <Code2 className="h-3 w-3" /> Recruiter Cheat Code
+            <div className="mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-mono-tech text-[10px] uppercase tracking-widest text-yellow-300">
+                <Code2 className="h-3 w-3" /> Recruiter Cheat Code
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+                className="text-zinc-500 hover:text-yellow-300"
+              >
+                <X className="h-3 w-3" />
+              </button>
             </div>
             <div className="mb-2 text-[10px] font-mono-tech uppercase tracking-widest text-zinc-500">
               Current: <span className="text-yellow-300">{current}</span>
@@ -61,7 +70,7 @@ export default function CheatCodePanel() {
                 <button
                   key={t}
                   onClick={() => setTier(t)}
-                  className={`border px-2 py-1.5 font-mono-tech text-[10px] uppercase tracking-widest transition ${
+                  className={`rounded-md border px-2 py-1.5 font-mono-tech text-[10px] uppercase tracking-widest transition ${
                     current === t
                       ? "border-yellow-400 bg-yellow-400/15 text-yellow-300"
                       : "border-zinc-700 text-zinc-300 hover:border-yellow-400 hover:text-yellow-300"
@@ -72,17 +81,18 @@ export default function CheatCodePanel() {
               ))}
             </div>
             <div className="mt-2 text-[9px] font-mono-tech text-zinc-500">
-              Demo-only RBAC override. Watch overlays lock/unlock instantly.
+              Demo-only RBAC override.
             </div>
           </motion.div>
         )}
       </AnimatePresence>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 border-2 border-yellow-400 bg-black/85 px-3 py-2 font-mono-tech text-[10px] uppercase tracking-widest text-yellow-300 shadow-[0_0_18px_rgba(252,211,77,0.35)] backdrop-blur-md transition hover:bg-yellow-400/10"
+        aria-label="Cheat code menu"
+        className="inline-flex items-center gap-1.5 rounded-full border border-yellow-400/70 bg-black/70 px-3 py-1.5 font-mono-tech text-[10px] uppercase tracking-[0.15em] text-yellow-300 shadow-[0_0_14px_rgba(252,211,77,0.35)] backdrop-blur-md transition hover:bg-yellow-400/10"
       >
-        <Crown className="h-3 w-3" /> Cheat Code
-        {open ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+        <Crown className="h-3 w-3" />
+        <span>Cheat</span>
       </button>
     </div>
   );
