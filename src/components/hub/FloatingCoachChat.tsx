@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Send, X, Sparkles } from "lucide-react";
+import { MessageSquare, Send, X, Sparkles, LogIn, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/lib/i18n";
 import { storage } from "@/lib/storage";
+import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 
 /**
@@ -27,17 +28,66 @@ const STATUS_LINE: Record<string, string> = {
 };
 
 export default function FloatingCoachChat() {
-  const { profile } = useAuth();
+  const { profile, isAuthed, user } = useAuth();
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [sending, setSending] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open]);
+
+  // Load persisted chat history for authenticated users. The chat-coach edge
+  // function writes user + assistant rows on every exchange keyed to the
+  // Supabase user id, so on login/reload we hydrate the transcript.
+  useEffect(() => {
+    let cancelled = false;
+    async function loadHistory() {
+      if (!isAuthed || !user) {
+        setMessages([]);
+        return;
+      }
+      setLoadingHistory(true);
+      const { data, error } = await supabase
+        .from("chat_history")
+        .select("id, message_role, message_text, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (cancelled) return;
+      if (error) {
+        console.error("chat history load", error);
+      } else if (data) {
+        setMessages(
+          data.map((r) => ({
+            id: r.id,
+            role: r.message_role === "assistant" ? "assistant" : "user",
+            text: r.message_text,
+          })),
+        );
+      }
+      setLoadingHistory(false);
+    }
+    loadHistory();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthed, user?.id]);
+
+  async function signInGoogle() {
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) toast.error("Sign-in failed");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sign-in failed");
+    }
+  }
 
   // Build the live context payload from the authenticated profile + local vault.
   const contextPayload = useMemo(() => {
@@ -112,6 +162,7 @@ export default function FloatingCoachChat() {
                   <div className="font-mono-tech text-[9px] uppercase tracking-widest text-crimson">
                     {contextPayload.chosen_character} · {String(contextPayload.tier).toUpperCase()} ·{" "}
                     {String(contextPayload.intensity).toUpperCase()}
+                    {isAuthed ? " · SYNCED" : " · GUEST"}
                   </div>
                 </div>
               </div>
@@ -124,11 +175,31 @@ export default function FloatingCoachChat() {
               </button>
             </header>
 
+            {!isAuthed && (
+              <div className="flex items-center justify-between gap-2 border-b border-yellow-500/30 bg-yellow-500/5 px-3 py-2 text-[11px] text-yellow-200/90">
+                <span className="font-mono-tech uppercase tracking-widest text-[9px]">
+                  Sign in to save your history
+                </span>
+                <button
+                  onClick={signInGoogle}
+                  className="inline-flex items-center gap-1 rounded-full border border-yellow-400/60 bg-black/70 px-2.5 py-1 font-mono-tech text-[9px] uppercase tracking-widest text-yellow-300 hover:bg-yellow-400/10"
+                >
+                  <LogIn className="h-3 w-3" /> Google
+                </button>
+              </div>
+            )}
+
             <div
               ref={scrollerRef}
               className="flex-1 space-y-3 overflow-y-auto bg-black/60 p-3"
             >
-              {messages.length === 0 && (
+              {loadingHistory && (
+                <div className="grid place-items-center gap-2 py-10 text-center text-xs text-zinc-400">
+                  <Loader2 className="h-5 w-5 animate-spin text-crimson" />
+                  <div className="font-mono-tech uppercase tracking-widest">Loading history…</div>
+                </div>
+              )}
+              {!loadingHistory && messages.length === 0 && (
                 <div className="grid place-items-center gap-2 py-10 text-center text-xs text-zinc-400">
                   <Sparkles className="h-6 w-6 text-crimson" />
                   <div className="font-mono-tech uppercase tracking-widest">
