@@ -4,6 +4,7 @@ import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, Rotate
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { storage, getActiveTier } from "@/lib/storage";
+import { funnelStorage } from "@/lib/funnel";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
 import { useLang, T } from "@/lib/i18n";
@@ -100,8 +101,8 @@ const AICoach = () => {
   const galleryEnabled = tier === "ultra";
 
   // --- React state -------------------------------------------------
-  const [archetype, setArchetype] = useState("kratos");
-  const [disciplines, setDisciplines] = useState<string[]>(["calisthenics"]);
+  const [archetype, setArchetype] = useState<string>(() => funnelStorage.getArchetype() ?? "kratos");
+  const [disciplines, setDisciplines] = useState<string[]>(() => funnelStorage.getDisciplineIds() ?? ["calisthenics"]);
   const [goal, setGoal] = useState("Calisthenics Mastery");
   const [level, setLevel] = useState("Intermediate");
   const [loading, setLoading] = useState(false);
