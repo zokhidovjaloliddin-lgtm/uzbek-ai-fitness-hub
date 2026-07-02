@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, RotateCw, Lock, Play, ChevronDown, ChevronUp, Video, CheckCircle2, Crown, Mail } from "lucide-react";
+import { Flame, Loader2, Settings, Sparkles, Trash2, Copy, AlertTriangle, RotateCw, Lock, Play, ChevronDown, ChevronUp, Video, CheckCircle2, Crown, Mail, FileDown, Repeat } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { storage, getActiveTier } from "@/lib/storage";
@@ -8,6 +8,7 @@ import { funnelStorage } from "@/lib/funnel";
 import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
 import { useLang, T } from "@/lib/i18n";
+import { celebrate } from "@/lib/feedback";
 
 const ARCHETYPES = [
   {
@@ -220,6 +221,27 @@ const AICoach = () => {
     } catch {
       toast.error("Clipboard unavailable on this device.");
     }
+  };
+
+  // Export the current training plan as PDF via the browser's print dialog.
+  // Uses the `.print-target` CSS in index.css to isolate the plan.
+  const exportPdf = () => {
+    if (!plan) return;
+    window.print();
+  };
+
+  // Signal to the AI Coach that the current cycle is complete. Clears the
+  // previous plan and immediately regenerates a fresh, evolved routine based
+  // on the same funnel selections.
+  const finishProtocol = async () => {
+    if (!plan || loading) return;
+    celebrate(); // screen-shake + success beep
+    storage.setPlan({
+      archetype, goal, plan: "", savedAt: new Date().toISOString(),
+    });
+    setPlan("");
+    toast.success("Protocol complete. Forging the next cycle…");
+    await generate();
   };
 
   // Need to import T inside component for prompt label translations
@@ -435,9 +457,27 @@ const AICoach = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="prose prose-invert prose-sm max-w-none prose-headings:font-display prose-headings:tracking-wide prose-h1:text-4xl prose-h1:text-crimson prose-h2:text-2xl prose-h2:mt-8 prose-h2:border-l-2 prose-h2:border-primary prose-h2:pl-3 prose-strong:text-crimson prose-table:font-mono-tech prose-table:text-xs prose-th:bg-muted prose-th:text-foreground prose-td:border-border prose-blockquote:border-l-primary prose-blockquote:not-italic prose-blockquote:text-foreground"
+                  className="print-target prose prose-invert prose-sm max-w-none prose-headings:font-display prose-headings:tracking-wide prose-h1:text-4xl prose-h1:text-crimson prose-h2:text-2xl prose-h2:mt-8 prose-h2:border-l-2 prose-h2:border-primary prose-h2:pl-3 prose-strong:text-crimson prose-table:font-mono-tech prose-table:text-xs prose-th:bg-muted prose-th:text-foreground prose-td:border-border prose-blockquote:border-l-primary prose-blockquote:not-italic prose-blockquote:text-foreground"
                 >
                   <ReactMarkdown>{plan}</ReactMarkdown>
+                  <div className="print-hide mt-8 grid gap-3 border-t border-primary/40 pt-6 sm:grid-cols-2">
+                    <button
+                      onClick={finishProtocol}
+                      disabled={loading}
+                      className="inline-flex items-center justify-center gap-2 bg-crimson px-4 py-4 font-display text-sm uppercase tracking-widest text-primary-foreground shadow-crimson transition hover:bg-primary-glow disabled:opacity-40"
+                    >
+                      <Repeat className="h-4 w-4" /> {t("co_finish_protocol")}
+                    </button>
+                    <button
+                      onClick={exportPdf}
+                      className="inline-flex items-center justify-center gap-2 border-2 border-primary bg-black/40 px-4 py-4 font-mono-tech text-xs uppercase tracking-widest text-foreground transition hover:bg-primary/10"
+                    >
+                      <FileDown className="h-4 w-4" /> {t("co_export_pdf")}
+                    </button>
+                    <div className="sm:col-span-2 text-center font-mono-tech text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {t("co_finish_sub")}
+                    </div>
+                  </div>
                 </motion.article>
               )}
             </AnimatePresence>
