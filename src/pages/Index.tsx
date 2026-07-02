@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Navbar from "@/components/hub/Navbar";
 import FlashDiscount, { hasSeenFlash, markFlashSeen } from "@/components/hub/FlashDiscount";
 import FloatingProBadge from "@/components/hub/FloatingProBadge";
@@ -8,6 +8,7 @@ import UltraBanner from "@/components/hub/UltraBanner";
 import Funnel from "@/components/funnel/Funnel";
 import { useAuth } from "@/hooks/useAuth";
 import { getActiveTier } from "@/lib/storage";
+import { celebrate } from "@/lib/feedback";
 
 const Index = () => {
   const [flashOpen, setFlashOpen] = useState(false);
@@ -39,6 +40,14 @@ const Index = () => {
     if (profile?.membership_tier === "ultra") return true;
     return getActiveTier() === "ultra";
   }, [profile?.membership_tier, tierTick]);
+
+  // Fire a one-shot screen-shake + audio confirmation the moment the user
+  // transitions INTO Ultra (never on initial hydration).
+  const ultraRef = useRef(isUltraTier);
+  useEffect(() => {
+    if (!ultraRef.current && isUltraTier) celebrate();
+    ultraRef.current = isUltraTier;
+  }, [isUltraTier]);
 
   // Auto-open the discount modal 3s after first onboarding pass.
   useEffect(() => {
