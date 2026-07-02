@@ -222,6 +222,29 @@ export const T: Dict = {
   fn_s5_enter: { en: "ENTER THE ARENA", uz: "ARENAGA KIRISH", ru: "ВОЙТИ НА АРЕНУ" },
 };
 
+// Additional keys for Step 6 actions & chat gating (kept flat for simplicity)
+Object.assign(T, {
+  co_finish_protocol: {
+    en: "I HAVE FINISHED THIS PROTOCOL",
+    uz: "MEN BU PROTOKOLNI YAKUNLADIM",
+    ru: "Я ЗАВЕРШИЛ ЭТОТ ПРОТОКОЛ",
+  },
+  co_finish_sub: {
+    en: "Evolve to the next cycle. The Coach will forge a new plan.",
+    uz: "Keyingi bosqichga o'ting. Murabbiy yangi rejani tuzadi.",
+    ru: "Перейдите к новому циклу. Тренер составит новый план.",
+  },
+  co_export_pdf: { en: "Export to PDF", uz: "PDF sifatida yuklab olish", ru: "Экспорт в PDF" },
+  chat_pro_locked: {
+    en: "PRO limit reached — 3 questions used. Upgrade to ULTRA for unlimited chat.",
+    uz: "PRO chegara: 3 ta savol ishlatildi. Cheksiz suhbat uchun ULTRAga o'ting.",
+    ru: "PRO лимит: 3 вопроса использовано. Перейдите на ULTRA для безлимитного чата.",
+  },
+  chat_upgrade: { en: "Upgrade to ULTRA", uz: "ULTRAga o'tish", ru: "Перейти на ULTRA" },
+  chat_pro_counter: { en: "PRO messages left", uz: "PRO savollar qoldi", ru: "PRO вопросов осталось" },
+  chat_ultra_badge: { en: "ULTRA · UNLIMITED", uz: "ULTRA · CHEKSIZ", ru: "ULTRA · БЕЗЛИМИТ" },
+});
+
 type Ctx = {
   lang: Lang;
   setLang: (l: Lang) => void;
