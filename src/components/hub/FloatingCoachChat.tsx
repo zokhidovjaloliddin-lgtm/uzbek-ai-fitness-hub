@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Send, X, Sparkles, LogIn, Loader2 } from "lucide-react";
+import { MessageSquare, Send, X, Sparkles, LogIn, Loader2, Lock, Crown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLang } from "@/lib/i18n";
-import { storage } from "@/lib/storage";
+import { storage, getActiveTier } from "@/lib/storage";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 
@@ -29,13 +29,29 @@ const STATUS_LINE: Record<string, string> = {
 
 export default function FloatingCoachChat() {
   const { profile, isAuthed, user } = useAuth();
-  const { lang } = useLang();
+  const { lang, t } = useLang();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [sending, setSending] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+
+  // --- Tier gating (PRO = 3 messages max, ULTRA = unlimited) --------------
+  const [tier, setTier] = useState<"standard" | "premium" | "ultra">(() => getActiveTier());
+  useEffect(() => {
+    const sync = () => setTier(getActiveTier());
+    window.addEventListener("frame:tier-changed", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("frame:tier-changed", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+  const userMsgCount = messages.filter((m) => m.role === "user").length;
+  const proCap = 3;
+  const proRemaining = Math.max(0, proCap - userMsgCount);
+  const proLocked = tier === "premium" && proRemaining === 0;
 
   useEffect(() => {
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight, behavior: "smooth" });
@@ -140,6 +156,13 @@ export default function FloatingCoachChat() {
 
   const statusLine = STATUS_LINE[lang] ?? STATUS_LINE.en;
 
+  const panelSkin =
+    tier === "ultra"
+      ? "chat-ultra"
+      : tier === "premium"
+        ? "chat-pro"
+        : "border-2 border-red-900/60 bg-black/95 shadow-[0_0_40px_rgba(220,38,38,0.35)] backdrop-blur-xl";
+
   return (
     <>
       {/* Floating chat panel above the bar */}
@@ -150,7 +173,7 @@ export default function FloatingCoachChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 240, damping: 26 }}
-            className="fixed bottom-16 right-4 z-[60] flex h-[70vh] max-h-[640px] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden border-2 border-red-900/60 bg-black/95 shadow-[0_0_40px_rgba(220,38,38,0.35)] backdrop-blur-xl"
+            className={`fixed bottom-16 right-4 z-[60] flex h-[70vh] max-h-[640px] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden ${panelSkin}`}
           >
             <header className="flex items-center justify-between border-b border-red-900/50 bg-gradient-to-r from-black via-red-950/40 to-black px-4 py-3">
               <div className="flex items-center gap-2">
@@ -174,6 +197,18 @@ export default function FloatingCoachChat() {
                 <X className="h-3.5 w-3.5" />
               </button>
             </header>
+
+            {tier === "ultra" && (
+              <div className="flex items-center justify-center gap-1.5 border-b border-yellow-400/40 bg-yellow-400/5 px-3 py-1.5 font-mono-tech text-[9px] uppercase tracking-widest text-yellow-300">
+                <Crown className="h-3 w-3" /> {t("chat_ultra_badge")}
+              </div>
+            )}
+            {tier === "premium" && !proLocked && (
+              <div className="flex items-center justify-between gap-2 border-b border-crimson/40 bg-crimson/5 px-3 py-1.5 font-mono-tech text-[9px] uppercase tracking-widest text-crimson">
+                <span>PRO</span>
+                <span>{t("chat_pro_counter")}: {proRemaining}/{proCap}</span>
+              </div>
+            )}
 
             {!isAuthed && (
               <div className="flex items-center justify-between gap-2 border-b border-yellow-500/30 bg-yellow-500/5 px-3 py-2 text-[11px] text-yellow-200/90">
@@ -217,6 +252,21 @@ export default function FloatingCoachChat() {
               )}
             </div>
 
+            {proLocked ? (
+              <div className="border-t border-crimson/60 bg-gradient-to-b from-crimson/10 to-black p-4">
+                <div className="flex items-center gap-2 font-mono-tech text-[10px] uppercase tracking-widest text-crimson">
+                  <Lock className="h-3.5 w-3.5" /> PRO limit
+                </div>
+                <div className="mt-1 text-xs text-zinc-200">{t("chat_pro_locked")}</div>
+                <a
+                  href="#pricing"
+                  onClick={() => setOpen(false)}
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 bg-crimson px-4 py-2.5 font-mono-tech text-[11px] uppercase tracking-widest text-primary-foreground transition hover:bg-primary-glow"
+                >
+                  <Crown className="h-3.5 w-3.5" /> {t("chat_upgrade")}
+                </a>
+              </div>
+            ) : (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -247,6 +297,7 @@ export default function FloatingCoachChat() {
                 <Send className="h-4 w-4" />
               </button>
             </form>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
