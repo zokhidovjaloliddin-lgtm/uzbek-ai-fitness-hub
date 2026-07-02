@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Navbar from "@/components/hub/Navbar";
 import FlashDiscount, { hasSeenFlash, markFlashSeen } from "@/components/hub/FlashDiscount";
 import FloatingProBadge from "@/components/hub/FloatingProBadge";
