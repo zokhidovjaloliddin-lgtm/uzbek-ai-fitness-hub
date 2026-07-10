@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import SectionHeader from "./SectionHeader";
 import { useLang, T } from "@/lib/i18n";
 import { celebrate } from "@/lib/feedback";
+import { savePlanToCloud } from "@/lib/plans";
 
 const ARCHETYPES = [
   {
@@ -197,6 +198,15 @@ const AICoach = () => {
         archetype, goal, plan: text,
         savedAt: new Date().toISOString(),
       });
+      // Fire-and-forget cloud persistence for the Plans / Home tabs.
+      savePlanToCloud({
+        archetype: selectedArchetype.name,
+        discipline: disciplineNames.join(", "),
+        language: lang,
+        plan_markdown: text,
+        total_days: 60,
+        title: `${selectedArchetype.name} · ${goal}`,
+      }).catch((err) => console.error("save plan", err));
       toast.success(t("co_success"));
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Unknown error";
@@ -240,7 +250,7 @@ const AICoach = () => {
       archetype, goal, plan: "", savedAt: new Date().toISOString(),
     });
     setPlan("");
-    toast.success("Protocol complete. Forging the next cycle…");
+      toast.success(t("co_finish_sub"));
     await generate();
   };
 
