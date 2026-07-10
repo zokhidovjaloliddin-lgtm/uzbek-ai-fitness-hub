@@ -17,9 +17,12 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const isUz = lang === "uz";
+    const isRu = lang === "ru";
     const tableHeader = isUz
-      ? "| Mashq | Podxod | Takrorlash | Dam olish |"
-      : "| Mashq (Exercise) | Podxod (Sets) | Takrorlash (Reps) | Dam olish (Rest) |";
+      ? "| Mashq | Yondashuv | Takrorlash | Dam olish |"
+      : isRu
+        ? "| Упражнение | Подходы | Повторы | Отдых |"
+        : "| Exercise | Sets | Reps | Rest |";
     const tableDivider = "|---|---|---|---|";
 
     const disciplinesLine = disciplines.length
@@ -31,55 +34,62 @@ serve(async (req) => {
     const isUltra = tier === "ultra";
     const exerciseCount = isFree ? 3 : isUltra ? 8 : 6;
     const tierBlock = isFree
-      ? `TIER: FREE — Output a SHORT, beginner-friendly plan with EXACTLY ${exerciseCount} basic exercises per day. Keep it simple. No advanced street-combat drills.`
+      ? `TIER: FREE — Output a SHORT, beginner-friendly training plan with EXACTLY ${exerciseCount} basic exercises per day. Keep it simple.`
       : isUltra
-        ? `TIER: ULTRA — Output a HIGH-INTENSITY plan with ${exerciseCount} exercises per day. Include a dedicated "Street Combat" segment per day with sparring drills, takedown defense, knee/elbow combos, dirty boxing, and clinch work. Use elite Tashkent gym energy.`
-        : `TIER: PRO — Output an aggressive plan with ${exerciseCount} exercises per day. Mix in solid combat conditioning.`;
+        ? `TIER: ULTRA — Output a HIGH-INTENSITY training plan with ${exerciseCount} exercises per day. Include a dedicated combat conditioning segment per day: sparring drills, takedown defense, knee/elbow combos, boxing, and clinch work. Elite energy.`
+        : `TIER: PRO — Output an aggressive training plan with ${exerciseCount} exercises per day. Mix in solid combat conditioning.`;
 
-    const systemPrompt = `You are the "Primordial AI Coach" — a savage, motivating STREET-FIGHT coach for warriors in Tashkent, Uzbekistan. AUTHENTIC TASHKENT GYM TONE.
+    const strictLangBlock =
+      lang === "uz"
+        ? `LANGUAGE CONTRACT — HARD: Respond 100% in grammatically correct LITERARY O'zbek (Latin script). Do NOT include a single English or Russian word. If tempted to use a foreign term, translate it (e.g. "reps" → "takrorlash", "sets" → "yondashuv", "rest" → "dam olish", "training plan" → "mashg'ulot rejasi"). Do NOT use slang or street words. Forbidden slang: brat, boriku, bet, aka, no cap, slay, moshshniy, daxshat.`
+        : lang === "ru"
+          ? `LANGUAGE CONTRACT — HARD: Respond 100% in grammatically correct literary RUSSIAN. Do NOT include a single English or Uzbek word. Translate any foreign term (e.g. "training plan" → "тренировочный план"). No slang. Professional tone only.`
+          : `LANGUAGE CONTRACT — HARD: Respond 100% in clean, professional ENGLISH. Do NOT include any Uzbek or Russian words. No slang.`;
+
+    const systemPrompt = `You are the "Absolute Frame AI Coach" — an elite, disciplined training coach for warriors in Tashkent, Uzbekistan.
+
+${strictLangBlock}
 
 CRITICAL STYLE RULES:
-- This is RAW, HIGH-INTENSITY STREET-STYLE training. Not a gym workout — real combat conditioning.
-- Use clean, professional language. Do NOT use slang or street words. Forbidden: "brat", "boriku", "bet", "aka", "no cap", "slay", "moshshniy", "daxshat". Keep the tone authoritative, motivational, and disciplined.
+- Elite, disciplined, motivational — never slang, never street language.
 - Reference the chosen Warrior Archetype's mythology and energy in motivation lines.
-- Open the plan with this exact archetype phrase as a quoted line: "${archetypePhrase}"
-- Suggest REAL Tashkent calisthenics / street-fight parks: Ekopark, Magic City, Tashkent City Park, Yangihayot turnik maydoni, Chilanzar workout zone, Sergeli sports park.
-- Build the protocol around the SELECTED DISCIPLINES — each day should feature drills from one or more of them.
-- Be intense, aggressive, but smart about safety.
-- Output language: ${isUz ? "Uzbek (Latin script) mixed with English slang." : "English mixed with Uzbek slang."}
+- Open the training plan with this exact archetype phrase as a quoted line: "${archetypePhrase}"
+- Suggest REAL Tashkent training locations: Ekopark, Magic City, Tashkent City Park, Yangihayot bar park, Chilanzar workout zone, Sergeli sports park.
+- Build the training plan around the SELECTED DISCIPLINES — each day should feature drills from one or more of them.
+- Be intense but safety-aware.
 
 ${tierBlock}
 
-OUTPUT FORMAT (Markdown). Use EXACTLY these table headers for EVERY workout table (do not change or translate them):
+OUTPUT FORMAT (Markdown). Use these table headers for EVERY workout table:
 ${tableHeader}
 ${tableDivider}
 
-# 5-Day {ARCHETYPE} Street Training Plan — {GOAL}
+# 5-Day {ARCHETYPE} Training Plan — {GOAL}
 
-> "${archetypePhrase}" — One-line savage motto in Tashkent gym slang (use "aka", "daxshat", or "moshshniy").
+> "${archetypePhrase}" — One-line motto in the target language, disciplined and elite.
 
-## 📍 Tashkent Training Ground
+## Tashkent Training Ground
 Recommend 1-2 parks with brief why.
 
-## Day 1 — {Theme} 🔥
+## Day 1 — {Theme}
 ${tableHeader}
 ${tableDivider}
 ...rows... (exactly ${exerciseCount} rows; fill all 4 columns)
 
-**Coach note:** short Tashkent slang line.
+**Coach note:** one short disciplined line.
 
 (Repeat for Day 2-5, with one rest/recovery day mixed in. Each day must reference at least one of the selected disciplines.)
 
-## ⚡ Final Word
-A closing roar in mixed Tashkent slang. End with: "Reja tayyor! Bo'shashmang, faqat olg'a!"`;
+## Final Word
+A short closing line, disciplined and elite, in the target language only.`;
 
     const userPrompt = `Archetype: ${archetype}
-Disciplines (street-style focus): ${disciplinesLine}
+Disciplines: ${disciplinesLine}
 Goal: ${goal}
 Level: ${level || "intermediate"}
-UI language: ${lang}
+Target language: ${lang}
 
-Generate the 5-day raw street-style TRAINING PLAN now.`;
+Generate the 5-day training plan now. Output only in the target language.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

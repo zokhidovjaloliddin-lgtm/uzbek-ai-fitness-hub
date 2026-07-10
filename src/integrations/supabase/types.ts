@@ -38,8 +38,41 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_day_completions: {
+        Row: {
+          completed_on: string
+          created_at: string
+          id: string
+          plan_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_on?: string
+          created_at?: string
+          id?: string
+          plan_id: string
+          user_id: string
+        }
+        Update: {
+          completed_on?: string
+          created_at?: string
+          id?: string
+          plan_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_day_completions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "training_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          avatar_url: string | null
           bmi: number | null
           bmi_category: string | null
           chosen_character: string | null
@@ -56,6 +89,7 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          avatar_url?: string | null
           bmi?: number | null
           bmi_category?: string | null
           chosen_character?: string | null
@@ -72,6 +106,7 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          avatar_url?: string | null
           bmi?: number | null
           bmi_category?: string | null
           chosen_character?: string | null
@@ -86,6 +121,57 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      training_plans: {
+        Row: {
+          archetype: string
+          completed_at: string | null
+          completed_days: number
+          created_at: string
+          discipline: string
+          id: string
+          language: string
+          plan_markdown: string
+          started_at: string
+          status: string
+          title: string
+          total_days: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archetype: string
+          completed_at?: string | null
+          completed_days?: number
+          created_at?: string
+          discipline: string
+          id?: string
+          language?: string
+          plan_markdown: string
+          started_at?: string
+          status?: string
+          title: string
+          total_days?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archetype?: string
+          completed_at?: string | null
+          completed_days?: number
+          created_at?: string
+          discipline?: string
+          id?: string
+          language?: string
+          plan_markdown?: string
+          started_at?: string
+          status?: string
+          title?: string
+          total_days?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

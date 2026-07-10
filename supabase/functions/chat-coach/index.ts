@@ -44,10 +44,10 @@ function intensityBlock(level: string) {
 
 function languageBlock(lang: string) {
   if (lang === "uz")
-    return "LANGUAGE: Respond 100% in grammatically correct literary O'zbek (Uzbek). Do not mix English or Russian. Do not use slang or street words.";
+    return "LANGUAGE CONTRACT — HARD: Respond 100% in grammatically correct LITERARY O'zbek (Latin script). Do NOT include a single English or Russian word. Translate every foreign term. Forbidden slang: brat, aka, boriku, bet, moshshniy, daxshat. Use the word 'mashg'ulot rejasi' (never 'protokol').";
   if (lang === "ru")
-    return "LANGUAGE: Respond 100% in grammatically correct Russian. Do not mix English or Uzbek. Do not use slang.";
-  return "LANGUAGE: Respond 100% in clean, professional English.";
+    return "LANGUAGE CONTRACT — HARD: Respond 100% in grammatically correct literary RUSSIAN. Do NOT include a single English or Uzbek word. Translate every foreign term (use 'тренировочный план'). No slang.";
+  return "LANGUAGE CONTRACT — HARD: Respond 100% in clean, professional ENGLISH. Do NOT use any Uzbek or Russian words. Use 'training plan' (never 'protocol').";
 }
 
 type Ctx = {

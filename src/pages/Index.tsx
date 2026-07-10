@@ -5,7 +5,12 @@ import FloatingProBadge from "@/components/hub/FloatingProBadge";
 import CheatCodePanel from "@/components/hub/CheatCodePanel";
 import FloatingCoachChat from "@/components/hub/FloatingCoachChat";
 import UltraBanner from "@/components/hub/UltraBanner";
-import Funnel from "@/components/funnel/Funnel";
+import BottomNav, { type Tab } from "@/components/nav/BottomNav";
+import HomeTab from "@/pages/tabs/HomeTab";
+import PlansTab from "@/pages/tabs/PlansTab";
+import CoachTab from "@/pages/tabs/CoachTab";
+import LocationTab from "@/pages/tabs/LocationTab";
+import ProfileTab from "@/pages/tabs/ProfileTab";
 import { useAuth } from "@/hooks/useAuth";
 import { getActiveTier } from "@/lib/storage";
 import { celebrate } from "@/lib/feedback";
@@ -13,6 +18,16 @@ import { celebrate } from "@/lib/feedback";
 const Index = () => {
   const [flashOpen, setFlashOpen] = useState(false);
   const { profile } = useAuth();
+  const initialTab: Tab = (() => {
+    const p = new URLSearchParams(window.location.search).get("tab");
+    return (["home","plans","coach","location","profile"].includes(p ?? "") ? (p as Tab) : "home");
+  })();
+  const [tab, setTab] = useState<Tab>(initialTab);
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    window.history.replaceState(null, "", url.toString());
+  }, [tab]);
   // Bump on local tier mutations so useMemo re-evaluates.
   const [tierTick, setTierTick] = useState(0);
   useEffect(() => {
@@ -68,10 +83,14 @@ const Index = () => {
   return (
     <div className={isUltraTier ? "ultra-mode" : ""}>
       {isUltraTier && <UltraBanner />}
-      <main className="min-h-screen bg-background text-foreground pb-16">
+      <main className="min-h-screen bg-background text-foreground pb-24">
         <Navbar />
         <h1 className="sr-only">Absolute Frame — AI Fitness & Cultural Hub for Tashkent</h1>
-        <Funnel />
+        {tab === "home" && <HomeTab onOpenCoach={() => setTab("coach")} />}
+        {tab === "plans" && <PlansTab onOpenCoach={() => setTab("coach")} />}
+        {tab === "coach" && <CoachTab />}
+        {tab === "location" && <LocationTab />}
+        {tab === "profile" && <ProfileTab />}
       </main>
       {isFreeTier && (
         <FlashDiscount
@@ -82,7 +101,8 @@ const Index = () => {
       )}
       <FloatingProBadge visible={isFreeTier} onClick={() => setFlashOpen(true)} />
       <CheatCodePanel />
-      <FloatingCoachChat />
+      {tab !== "coach" && <FloatingCoachChat />}
+      <BottomNav active={tab} onChange={setTab} />
     </div>
   );
 };
