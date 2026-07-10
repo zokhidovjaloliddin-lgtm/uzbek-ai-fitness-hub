@@ -226,14 +226,14 @@ export const T: Dict = {
 // Additional keys for Step 6 actions & chat gating (kept flat for simplicity)
 Object.assign(T, {
   co_finish_protocol: {
-    en: "I HAVE FINISHED THIS PROTOCOL",
-    uz: "MEN BU PROTOKOLNI YAKUNLADIM",
-    ru: "Я ЗАВЕРШИЛ ЭТОТ ПРОТОКОЛ",
+    en: "I HAVE FINISHED THIS TRAINING PLAN",
+    uz: "MEN BU MASHG'ULOT REJASINI YAKUNLADIM",
+    ru: "Я ЗАВЕРШИЛ ЭТОТ ТРЕНИРОВОЧНЫЙ ПЛАН",
   },
   co_finish_sub: {
-    en: "Evolve to the next cycle. The Coach will forge a new plan.",
-    uz: "Keyingi bosqichga o'ting. Murabbiy yangi rejani tuzadi.",
-    ru: "Перейдите к новому циклу. Тренер составит новый план.",
+    en: "Evolve to the next cycle. The Coach will work on a new plan.",
+    uz: "Keyingi bosqichga o'ting. Murabbiy yangi reja ustida ishlaydi.",
+    ru: "Переходите к следующему циклу. Тренер составит новый план.",
   },
   co_export_pdf: { en: "Export to PDF", uz: "PDF sifatida yuklab olish", ru: "Экспорт в PDF" },
   chat_pro_locked: {
@@ -244,6 +244,67 @@ Object.assign(T, {
   chat_upgrade: { en: "Upgrade to ULTRA", uz: "ULTRAga o'tish", ru: "Перейти на ULTRA" },
   chat_pro_counter: { en: "PRO messages left", uz: "PRO savollar qoldi", ru: "PRO вопросов осталось" },
   chat_ultra_badge: { en: "ULTRA · UNLIMITED", uz: "ULTRA · CHEKSIZ", ru: "ULTRA · БЕЗЛИМИТ" },
+
+  // Tabs
+  tab_home: { en: "Home", uz: "Bosh sahifa", ru: "Главная" },
+  tab_plans: { en: "Plans", uz: "Rejalar", ru: "Планы" },
+  tab_coach: { en: "Coach", uz: "Murabbiy", ru: "Тренер" },
+  tab_location: { en: "Location", uz: "Manzil", ru: "Место" },
+  tab_profile: { en: "Profile", uz: "Profil", ru: "Профиль" },
+
+  // Home
+  home_greeting: { en: "Welcome back", uz: "Qaytganingiz bilan", ru: "С возвращением" },
+  home_streak: { en: "Day streak", uz: "Kunlik seriya", ru: "Дней подряд" },
+  home_active_plans: { en: "Active Plans", uz: "Faol Rejalar", ru: "Активные планы" },
+  home_completed_plans: { en: "Completed Plans", uz: "Yakunlangan Rejalar", ru: "Завершённые планы" },
+  home_no_plans: { en: "No training plans yet. Create your first one from the Coach tab.", uz: "Hali reja yo'q. Murabbiy sahifasidan birinchi rejangizni yarating.", ru: "Планов ещё нет. Создайте первый на вкладке Тренер." },
+  home_mark_today: { en: "Mark today done", uz: "Bugungi kunni belgilash", ru: "Отметить сегодня" },
+  home_marked_today: { en: "Marked today", uz: "Bugun belgilangan", ru: "Отмечено сегодня" },
+  home_view_details: { en: "View details", uz: "Batafsil", ru: "Подробнее" },
+  home_progress: { en: "Progress", uz: "Progress", ru: "Прогресс" },
+  home_days_done: { en: "days completed", uz: "kun bajarilgan", ru: "дней выполнено" },
+  home_edit_name: { en: "Edit name", uz: "Ismni tahrirlash", ru: "Изменить имя" },
+  home_upload_photo: { en: "Upload photo", uz: "Rasm yuklash", ru: "Загрузить фото" },
+
+  // Plans tab
+  plans_title: { en: "My Training Plans", uz: "Mashg'ulot Rejalarim", ru: "Мои планы тренировок" },
+  plans_filter_all: { en: "All", uz: "Hammasi", ru: "Все" },
+  plans_filter_active: { en: "Active", uz: "Faol", ru: "Активные" },
+  plans_filter_completed: { en: "Completed", uz: "Yakunlangan", ru: "Завершённые" },
+  plans_new: { en: "Create new plan", uz: "Yangi reja yaratish", ru: "Создать новый план" },
+  plans_status_active: { en: "In Progress", uz: "Jarayonda", ru: "В процессе" },
+  plans_status_completed: { en: "Completed", uz: "Yakunlangan", ru: "Завершено" },
+  plans_status_abandoned: { en: "Archived", uz: "Arxivlangan", ru: "Архив" },
+  plans_delete: { en: "Delete plan", uz: "Rejani o'chirish", ru: "Удалить план" },
+
+  // Location tab
+  loc_title: { en: "Tashkent Training Locations", uz: "Toshkent Mashg'ulot Manzillari", ru: "Места тренировок в Ташкенте" },
+  loc_sub: { en: "Curated gyms, calisthenics parks, and MMA clubs across the city.", uz: "Shahar bo'ylab tanlangan sport zallari, kalisteniks parklari va MMA klublari.", ru: "Отобранные залы, парки калистеники и MMA-клубы по городу." },
+  loc_filter_all: { en: "All", uz: "Hammasi", ru: "Все" },
+  loc_open_map: { en: "Open in Maps", uz: "Xaritada ochish", ru: "Открыть на карте" },
+  loc_nearest: { en: "Sort by nearest", uz: "Yaqinlik bo'yicha", ru: "По близости" },
+
+  // Profile tab
+  prof_title: { en: "Profile", uz: "Profil", ru: "Профиль" },
+  prof_display_name: { en: "Display name", uz: "Ko'rinadigan ism", ru: "Отображаемое имя" },
+  prof_language: { en: "Language", uz: "Til", ru: "Язык" },
+  prof_height: { en: "Height (cm)", uz: "Bo'y (sm)", ru: "Рост (см)" },
+  prof_weight: { en: "Weight (kg)", uz: "Vazn (kg)", ru: "Вес (кг)" },
+  prof_bmi: { en: "BMI", uz: "BMI", ru: "BMI" },
+  prof_tier: { en: "Membership", uz: "Obuna", ru: "Подписка" },
+  prof_signed_in_as: { en: "Signed in as", uz: "Kirilgan hisob", ru: "Вошли как" },
+  prof_not_signed_in: { en: "You are not signed in. Sign in to sync your progress across devices.", uz: "Siz tizimga kirmagansiz. Barcha qurilmalarda progressni saqlash uchun kiring.", ru: "Вы не вошли. Войдите, чтобы синхронизировать прогресс." },
+  prof_save: { en: "Save changes", uz: "O'zgarishlarni saqlash", ru: "Сохранить" },
+  prof_saved: { en: "Saved", uz: "Saqlandi", ru: "Сохранено" },
+
+  // Recommended prompts
+  rec_nutrition: { en: "Nutrition plan for my archetype", uz: "Arxetipim uchun ovqatlanish rejasi", ru: "План питания для моего архетипа" },
+  rec_avoid: { en: "Foods and habits to avoid", uz: "Qaysi ovqat va odatlardan qochish kerak", ru: "Каких продуктов и привычек избегать" },
+  rec_recovery: { en: "How to recover faster", uz: "Qanday tezroq tiklaniladi", ru: "Как быстрее восстанавливаться" },
+  rec_scale_up: { en: "Scale my plan up (Level Up)", uz: "Rejamni kuchaytiring (Level Up)", ru: "Усилить мой план (Level Up)" },
+  rec_halal: { en: "Halal-friendly meal options", uz: "Halol ovqat variantlari", ru: "Халяльные варианты питания" },
+  rec_sleep: { en: "Sleep and hydration schedule", uz: "Uyqu va suv tartibi", ru: "Режим сна и воды" },
+  rec_prompts_title: { en: "Recommended prompts", uz: "Tavsiya etilgan savollar", ru: "Рекомендуемые вопросы" },
 });
 
 type Ctx = {
