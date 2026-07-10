@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Lang = "en" | "uz" | "ru";
 
@@ -117,7 +118,7 @@ export const T: Dict = {
     ru: "Посмотрите брифинг. Впитайте дисциплину. Откройте план тренировок.",
   },
   co_unlock_hint: { en: "Confirming after you've watched the edits.", uz: "Edits tomosha qilingach tasdiqlang.", ru: "Подтвердите после просмотра видео." },
-  co_unlocked: { en: "Briefing complete · Protocol unlocked", uz: "Brifing tugadi · Protokol ochildi", ru: "Брифинг завершён · протокол открыт" },
+  co_unlocked: { en: "Briefing complete · Training plan unlocked", uz: "Brifing tugadi · Mashg'ulot rejasi ochildi", ru: "Брифинг завершён · план открыт" },
   co_more_edits: { en: "Watch More Edits", uz: "Yana Videolar", ru: "Больше видео" },
   co_close: { en: "Close", uz: "Yopish", ru: "Закрыть" },
   co_ready: { en: "I AM READY TO TRAIN", uz: "MASHG'ULOTGA TAYYORMAN", ru: "Я ГОТОВ К ТРЕНИРОВКЕ" },
@@ -127,7 +128,7 @@ export const T: Dict = {
   co_clear: { en: "Clear Vault", uz: "Xotirani Tozalash", ru: "Очистить" },
   co_saved: { en: "Saved", uz: "Saqlangan", ru: "Сохранено" },
   co_loading: { en: "Generating answers...", uz: "Javoblar yaratilmoqda...", ru: "Генерация ответа..." },
-  co_forging: { en: "Forging...", uz: "Yaratilmoqda...", ru: "Создаём..." },
+  co_forging: { en: "Working on your selected plan...", uz: "Tanlangan rejangiz ustida ishlanmoqda...", ru: "Работаем над выбранным планом..." },
   co_empty_title: { en: "AWAITING RESPONSE", uz: "JAVOB KUTILMOQDA", ru: "ОЖИДАНИЕ ОТВЕТА" },
   co_empty_sub: {
     en: "Choose your archetype, select your disciplines, then watch the briefing to unlock the protocol.",
