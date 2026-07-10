@@ -331,9 +331,34 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
   const setLang = (l: Lang) => {
+    const previous = localStorage.getItem("absolute_frame_lang");
     setLangState(l);
     setHasChosen(true);
     localStorage.setItem("absolute_frame_lang", l);
+    // Language switch: purge cached plan + chat history in the previous
+    // language so every subsequent output is 100% in the newly-chosen
+    // language. Only trigger when the language actually changed.
+    if (previous && previous !== l) {
+      try {
+        localStorage.removeItem("absolute_frame_plan");
+      } catch { /* ignore */ }
+      (async () => {
+        try {
+          const { data } = await supabase.auth.getUser();
+          const uid = data.user?.id;
+          if (uid) {
+            await supabase.from("chat_history").delete().eq("user_id", uid);
+            await supabase
+              .from("training_plans")
+              .update({ status: "abandoned" })
+              .eq("user_id", uid)
+              .eq("status", "active")
+              .neq("language", l);
+          }
+        } catch { /* ignore */ }
+        try { window.dispatchEvent(new CustomEvent("frame:lang-changed", { detail: { lang: l } })); } catch { /* ignore */ }
+      })();
+    }
   };
   const t = (key: keyof typeof T) => T[key]?.[lang] ?? T[key]?.en ?? String(key);
   return <LangContext.Provider value={{ lang, setLang, t, hasChosen }}>{children}</LangContext.Provider>;
