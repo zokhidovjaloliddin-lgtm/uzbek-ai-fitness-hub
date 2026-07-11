@@ -148,6 +148,19 @@ export default function AuthPage() {
               {mode === "signin" ? t("auth_sign_up") : t("auth_sign_in")}
             </button>
           </div>
+
+          <div className="mt-6 border-t border-border pt-4 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.setItem("guest", "1");
+                nav("/", { replace: true });
+              }}
+              className="font-mono-tech text-[11px] uppercase tracking-widest text-muted-foreground underline underline-offset-4 hover:text-foreground"
+            >
+              Continue as guest →
+            </button>
+          </div>
         </motion.div>
       </div>
     </main>
