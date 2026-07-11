@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Navigate } from "react-router-dom";
 import Navbar from "@/components/hub/Navbar";
 import FlashDiscount, { hasSeenFlash, markFlashSeen } from "@/components/hub/FlashDiscount";
 import FloatingProBadge from "@/components/hub/FloatingProBadge";
 import CheatCodePanel from "@/components/hub/CheatCodePanel";
-import FloatingCoachChat from "@/components/hub/FloatingCoachChat";
 import UltraBanner from "@/components/hub/UltraBanner";
 import BottomNav, { type Tab } from "@/components/nav/BottomNav";
 import HomeTab from "@/pages/tabs/HomeTab";
@@ -17,12 +17,31 @@ import { celebrate } from "@/lib/feedback";
 
 const Index = () => {
   const [flashOpen, setFlashOpen] = useState(false);
-  const { profile } = useAuth();
+  const { profile, isAuthed, loading } = useAuth();
+  const isGuest = typeof window !== "undefined" && sessionStorage.getItem("guest") === "1";
+
+  // Auth gate — require sign-in unless the user explicitly chose guest.
+  if (!loading && !isAuthed && !isGuest) {
+    return <Navigate to="/auth" replace />;
+  }
   const initialTab: Tab = (() => {
     const p = new URLSearchParams(window.location.search).get("tab");
-    return (["home","plans","coach","location","profile"].includes(p ?? "") ? (p as Tab) : "home");
+    if (["home","plans","coach","location","profile"].includes(p ?? "")) return p as Tab;
+    // First-time users (no active plan yet) land on the Coach tab so the
+    // AI Coach can walk them through their first plan.
+    return "home";
   })();
   const [tab, setTab] = useState<Tab>(initialTab);
+
+  // Auto-route new users into the coach on first authenticated load.
+  useEffect(() => {
+    if (!isAuthed || !profile) return;
+    if (profile.onboarded_at) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("tab")) return;
+    setTab("coach");
+  }, [isAuthed, profile?.onboarded_at]);
+
   useEffect(() => {
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
@@ -101,7 +120,6 @@ const Index = () => {
       )}
       <FloatingProBadge visible={isFreeTier} onClick={() => setFlashOpen(true)} />
       <CheatCodePanel />
-      {tab !== "coach" && <FloatingCoachChat />}
       <BottomNav active={tab} onChange={setTab} />
     </div>
   );

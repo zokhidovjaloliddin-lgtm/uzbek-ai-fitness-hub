@@ -1,142 +1,95 @@
 
-## Overview
+## Goal
 
-Convert the single-funnel page into a 5-tab bottom-nav app while keeping the existing funnel intact as the Coach tab. Add durable Plans + Progress, an avatar upload flow, a Location tab, and enforce strict single-language output (EN / UZ / RU) across UI copy AND generated training plans. Global copy rename: "protocol" → "training plan", "forging" → "working on your selected plans".
+Rework the entry flow, plan generation, and coach button placement so the app behaves like a real product: sign-in first (with guest preview), the AI coach chat is the only thing that creates and levels up training plans, and level/XP/progress on Home reflect real DB values written by the coach — not mockups.
 
-## 1. Global copy + language enforcement
+## 1. Landing / routing (auth first, guest preview)
 
-- Rename across all i18n keys and hardcoded strings: `protocol` → `training plan` (UZ: `mashg'ulot rejasi`, RU: `тренировочный план`), `forging` → `working on your selected plans` (UZ: `tanlangan rejangiz ustida ishlash`, RU: `работа над выбранным планом`). Includes `CheatCodePanel`, `AICoach` ("FINISHED THIS PROTOCOL", "Forging your protocol..."), `FloatingCoachChat`, `UltraBanner`, `Pricing`, `Funnel` step titles.
-- Edge functions (`chat-coach`, `generate-workout`): tighten `languageBlock()` to a hard contract — "Respond ONLY in {lang}. Do not include a single word in any other language. If tempted to use an English term, translate it. Never use Uzbek/Russian slang. Use only literary registers." Pass `language` from `i18n.getLanguage()` on every request.
-- On language switch (`i18n.setLanguage`): wipe cached plan (`storage.setPlan(null)`), clear `chat_history` rows for the user, clear local funnel step cache. Trigger a fresh `generate-workout` regeneration when the user re-enters the Coach tab so the plan is 100% in the new language.
-- Remove any leftover Uzbek slang tokens ("brat", "aka", "boriku", etc.) from all copy and system prompts; explicit forbidden list already exists in `chat-coach` — mirror it into `generate-workout`.
+- Root route (`/`) becomes a gate:
+  - Not signed in → redirect to `/auth` (existing `src/pages/Auth.tsx`).
+  - `/auth` shows sign in / sign up, plus a small `Continue as guest` link.
+  - Guests get a `guest=1` flag in `sessionStorage`; they can run the funnel + chat but every "save plan / level up / mark day done" action opens a sign-in sheet instead of writing.
+- After auth (or guest continue) → funnel steps (language → discipline → intro video → "I'M READY TO TRAIN").
+- Pressing "I'M READY TO TRAIN" no longer calls `generate-workout`. It navigates into the Coach tab and opens a fresh chat with the AI coach, seeded with the user's funnel answers as the first system/context message.
+- After the funnel has been completed once (persisted in `profiles.onboarded_at` for signed-in users, or `localStorage` for guests), future visits skip straight to the Home tab.
 
-## 2. Bottom navigation shell
+## 2. Bottom nav + coach button cleanup
 
-- New `src/components/nav/BottomNav.tsx` — fixed bottom, safe-area padded, 5 pill tabs: Home / Plans / Coach / Location / Profile. Icons: `Home`, `ClipboardList`, `Sparkles` replaced with a domain image mark for Coach, `MapPin`, `User`. Active tab: crimson underline + glow, label always visible.
-- `src/pages/Index.tsx` becomes a tab router with `useState<Tab>`; renders one of `HomeTab`, `PlansTab`, `CoachTab` (= existing `Funnel` + AI output), `LocationTab`, `ProfileTab`. Floating pills (Cheat, Discount) and `FloatingCoachChat` remain global but hide on the Coach tab (full-screen coach experience).
-- URL sync via `?tab=` search param so refresh restores tab.
+- Remove `FloatingCoachChat` entirely (component + usages in `Index.tsx`). No more separate floating coach button.
+- `BottomNav.tsx` keeps its 5 slots, but the center Coach slot becomes the single entry point to the coach — bigger crimson pill, label "COACH".
+- Coach tab renders full-viewport (no funnel wrapper): header, message list, recommended-prompt chips row, sticky composer. No pricing / footer inside the tab.
+- Recommended prompt chips (localized) sit right above the composer and dispatch text into the input:
+  `Ask about nutrition`, `What to avoid`, `Recovery`, `Halal diet`, `Sleep`, `Level me up`, `Scale my plan`.
 
-## 3. Coach tab (full-screen)
+## 3. Chat-only plan generation
 
-- The Coach tab renders the existing `Funnel` up through the AI Coach output but expanded to the full viewport (no bottom pricing until user scrolls). 
-- Add a **Recommended Prompts** rail above the chat input: chips like "Ask about nutrition", "What foods to avoid", "How to recover faster", "Scale up my plan", "Halal diet options" — localized. Clicking a chip fills the composer and auto-focuses.
-- Hide `FloatingCoachChat` while on Coach tab (would duplicate). Keep persistent history via existing `chat_history` table.
+- Delete the `generate-workout` one-shot path from the UI. Keep the edge function file for now but stop calling it; plans come only from `chat-coach`.
+- Extend `supabase/functions/chat-coach/index.ts`:
+  - Adds AI SDK tool calls the model can invoke:
+    - `create_training_plan({ title, archetype, discipline, total_days, plan_markdown })` → inserts into `training_plans` for the authed user, marks it `active`, and archives any other active plan for that user.
+    - `update_plan_progress({ plan_id, completed_days_delta, level_delta, xp_delta, note })` → updates the active plan row.
+    - `level_up({ plan_id, new_level, unlocked_title })` → bumps `level` + writes a milestone row.
+  - System prompt: coach must ask 3–5 short qualifying questions (goal, experience, days/week, equipment, injuries), then call `create_training_plan` exactly once, then continue chatting for coaching + level-ups. Strict single-language contract (EN / UZ / RU).
+- On the client, when a tool result comes back, the Coach tab shows an inline "Plan saved ✓ — view in Home" card and Home + Plans tabs invalidate their queries so the new plan appears immediately.
 
-## 4. Home tab
+## 4. Real progress on Home (no mockups)
 
-- Header card: greeting + user avatar (top-right). Avatar area supports:
-  - Tap → sheet with two options: **Upload from device** (file input, images only, ≤5 MB) + **Choose recommended** grid (6 preset warrior avatars generated via `imagegen`, stored as project assets: kratos, yujiro, khabib, khamzat, spartan, samurai).
-  - Uploads go to a new Cloud Storage bucket `avatars` (private, RLS: user reads/writes their own path `{user_id}/…`). URL saved to `profiles.avatar_url` (new column).
-- Editable display name inline (pencil icon → input → save to `profiles.display_name`).
-- Below: **My Training Plans** list — each row = plan card with:
-  - Plan title (archetype + discipline + created date)
-  - Circular progress ring (0–100%) using SVG stroke-dasharray; crimson fill
-  - Stats line: `X / Y days completed · started {date} · {duration} weeks`
-  - Status pill: `In Progress` / `Completed` / `Abandoned`
-  - Actions: Continue → jumps to Coach tab with that plan hydrated; Mark day done (+); View details.
-- Additional home widgets (added on my own for a professional feel):
-  - Streak counter (consecutive days with a completed session)
-  - Weekly volume chart (last 7 days, simple bars)
-  - Next session card (today's prescribed lift/skill)
-  - Motivational quote of the day (per archetype, localized)
+- Extend `training_plans` with the level/XP fields the coach writes to; add a `plan_milestones` table for level-up history.
+- Home tab reads real values:
+  - Active plan card: title, level, XP bar, `completed_days / total_days`, streak (from `plan_day_completions`), last milestone.
+  - "Mark today done" button → `markTodayDone()` (already implemented) — kept, but the level-ups themselves come from the coach's tool calls, not from client math.
+  - Empty state (no plan yet): CTA "Talk to the AI Coach" → opens Coach tab.
+- Remove any hardcoded / demo plan fallbacks in `HomeTab.tsx` and `PlanCard.tsx`.
 
-## 5. Plans tab
+## 5. Guest → sign-in upgrade
 
-- Full list of all training plans (past + current), filter chips (All / Active / Completed).
-- Each card = detailed breakdown with the same circular progress.
-- Tap a card → detail sheet: full plan markdown, day-by-day checklist. Checking a day increments `completed_days` → recalculates progress %.
-- "Create new training plan" CTA at bottom → routes to Coach tab, resets funnel.
-
-## 6. Location tab
-
-- Simple curated map of Tashkent lifting/calisthenics/MMA gyms:
-  - Static list of ~8 hand-picked gyms (name, discipline tag, district, hours, phone, Google Maps link).
-  - Embedded OpenStreetMap iframe (no API key) centered on Tashkent showing pins.
-  - Filter chips by discipline (MMA / Calisthenics / Powerlifting / Mixed).
-  - "Nearest to me" button uses browser geolocation to sort by distance (Haversine, client-side).
-
-## 7. Profile tab
-
-- Auth-gated. Shows: avatar, display name, email, tier badge, joined date.
-- Editable fields: display_name, preferred_language (EN/UZ/RU), height, weight, goals — all persisted to `profiles`.
-- Sections: Subscription (link to Pricing), Language, Sign out, Delete account (soft: signs out + clears local cache).
-- Recompute BMI live on weight/height change; reflects immediately in Home + Coach.
-
-## 8. Progress model (professional default)
-
-Implemented as **manual check-offs with auto-inferred duration**:
-- Each plan has `total_days` (derived from archetype: e.g. Kratos = 84, Yujiro = 60, etc.) and `completed_days` (int).
-- `progress = round(completed_days / total_days * 100)`.
-- User marks a day complete from Home ("Mark today done") or from the plan detail sheet.
-- Auto-completes plan when `completed_days >= total_days` → screen-shake + celebrate() beep, moves to Completed list, unlocks next-cycle regeneration.
+- Guest chat messages are held in memory only (no `chat_history` writes).
+- If the coach tries to call `create_training_plan` / `level_up` while `guest=1`, the client intercepts and shows a "Sign in to save your plan" sheet. On successful sign-in, the queued tool call is replayed against the now-authenticated session so the plan lands in their account.
 
 ## Technical section
 
-### New DB tables (migration)
+### DB migration
 
 ```sql
--- profiles: add avatar_url
-ALTER TABLE public.profiles ADD COLUMN avatar_url TEXT;
+ALTER TABLE public.training_plans
+  ADD COLUMN IF NOT EXISTS level INT NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS xp INT NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS xp_to_next INT NOT NULL DEFAULT 100;
 
--- training_plans
-CREATE TABLE public.training_plans (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL,
-  title TEXT NOT NULL,
-  archetype TEXT NOT NULL,
-  discipline TEXT NOT NULL,
-  language TEXT NOT NULL DEFAULT 'en',
-  plan_markdown TEXT NOT NULL,
-  total_days INT NOT NULL DEFAULT 60,
-  completed_days INT NOT NULL DEFAULT 0,
-  status TEXT NOT NULL DEFAULT 'active',  -- active | completed | abandoned
-  started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  completed_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.training_plans TO authenticated;
-GRANT ALL ON public.training_plans TO service_role;
-ALTER TABLE public.training_plans ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "own plans" ON public.training_plans FOR ALL
-  USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS onboarded_at TIMESTAMPTZ;
 
--- plan_day_completions (for streak + calendar heatmap)
-CREATE TABLE public.plan_day_completions (
+CREATE TABLE public.plan_milestones (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL,
   plan_id UUID NOT NULL REFERENCES public.training_plans(id) ON DELETE CASCADE,
-  completed_on DATE NOT NULL DEFAULT CURRENT_DATE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (plan_id, completed_on)
+  kind TEXT NOT NULL,          -- 'level_up' | 'day_done' | 'plan_created' | 'plan_completed'
+  level INT,
+  title TEXT,
+  note TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-GRANT SELECT, INSERT, DELETE ON public.plan_day_completions TO authenticated;
-GRANT ALL ON public.plan_day_completions TO service_role;
-ALTER TABLE public.plan_day_completions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "own completions" ON public.plan_day_completions FOR ALL
-  USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+GRANT SELECT, INSERT ON public.plan_milestones TO authenticated;
+GRANT ALL ON public.plan_milestones TO service_role;
+ALTER TABLE public.plan_milestones ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own milestones select" ON public.plan_milestones FOR SELECT
+  USING (auth.uid() = user_id);
+CREATE POLICY "own milestones insert" ON public.plan_milestones FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
 ```
 
-### Storage bucket
+### Edge function tool-calling shape
 
-- Create private bucket `avatars` via `supabase--storage_create_bucket`.
-- RLS on `storage.objects`: users may read/write files where `(storage.foldername(name))[1] = auth.uid()::text`.
+Use AI SDK `streamText({ tools: { create_training_plan, update_plan_progress, level_up }, stopWhen: stepCountIs(6) })`. Each tool's `execute` uses a service-role Supabase client scoped to the JWT's `sub` (user_id) it read from the `Authorization` header. Emit tool results back into the UI stream so the client can react.
 
-### New/modified files
+### New / edited files
 
-- **new**: `src/components/nav/BottomNav.tsx`, `src/pages/tabs/HomeTab.tsx`, `PlansTab.tsx`, `CoachTab.tsx`, `LocationTab.tsx`, `ProfileTab.tsx`, `src/components/home/AvatarPicker.tsx`, `src/components/home/PlanCard.tsx`, `src/components/home/ProgressRing.tsx`, `src/components/coach/RecommendedPrompts.tsx`, `src/lib/plans.ts` (CRUD + progress helpers), `src/assets/avatars/*.jpg.asset.json` (6 generated presets).
-- **edit**: `src/pages/Index.tsx` (tab router), `src/lib/i18n.tsx` (new keys + rename + language-switch cache purge), `src/components/hub/AICoach.tsx` (persist plan into `training_plans` on generation; rename copy), `src/components/hub/FloatingCoachChat.tsx` (hide on Coach tab), `supabase/functions/chat-coach/index.ts` + `generate-workout/index.ts` (hard language contract), `src/index.css` (bottom-nav spacing, safe-area).
-
-### Language purge behavior
-
-`i18n.setLanguage(lang)`:
-1. `localStorage.setItem('lang', lang)`
-2. `storage.setPlan(null)` (clear cached plan)
-3. `supabase.from('chat_history').delete().eq('user_id', uid)` if signed in
-4. `supabase.from('training_plans').update({ status: 'abandoned' }).eq('user_id', uid).eq('status', 'active').neq('language', lang)` — old-language active plans get archived, not shown as current
-5. Emit `frame:lang-changed` event → `CoachTab` triggers `generate-workout` regeneration
+- **new**: `src/pages/tabs/CoachTab.tsx` (full rewrite — no `Funnel` wrapper, dedicated chat layout), `src/components/coach/RecommendedPrompts.tsx`, `src/components/coach/PlanSavedCard.tsx`, `src/components/auth/AuthGate.tsx`, `src/components/auth/SignInToSaveSheet.tsx`, `src/lib/coachTools.ts` (client-side handlers for tool result messages + guest queue).
+- **edit**: `src/pages/Index.tsx` (AuthGate wrapper + remove `FloatingCoachChat`), `src/components/nav/BottomNav.tsx` (bigger center pill), `src/pages/Auth.tsx` (add "Continue as guest"), `src/components/funnel/Funnel.tsx` (final step routes to Coach tab instead of calling `generate-workout`), `src/components/hub/AICoach.tsx` (deprecate or slim to just render chat history; remove one-shot generation), `src/pages/tabs/HomeTab.tsx` + `src/components/home/PlanCard.tsx` (read level/XP/milestones from DB; kill mockups), `src/lib/plans.ts` (add `getActivePlan`, `getMilestones`), `supabase/functions/chat-coach/index.ts` (tools + single-language contract).
+- **delete usage of**: `src/components/hub/FloatingCoachChat.tsx` (remove import from `Index.tsx`; file can stay unused or be deleted in the same pass).
 
 ### Out of scope / preserved
 
-- Existing Cheat Code panel, Ultra demon-mode theme, Flash Discount pill, tier gating, and pricing tiers stay unchanged.
-- No changes to auth flow or Supabase auth providers.
+- Cheat Code panel, Ultra theme, Flash Discount pill, Pricing, existing i18n strings (only the plan-generation copy changes).
+- No changes to auth providers or Supabase auth config.
+- `generate-workout` edge function stays on disk but is no longer invoked.
