@@ -70,6 +70,47 @@ export type Database = {
           },
         ]
       }
+      plan_milestones: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          level: number | null
+          note: string | null
+          plan_id: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          level?: number | null
+          note?: string | null
+          plan_id: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          level?: number | null
+          note?: string | null
+          plan_id?: string
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_milestones_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "training_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -83,6 +124,7 @@ export type Database = {
           height_cm: number | null
           intensity_level: string
           membership_tier: string
+          onboarded_at: string | null
           preferred_language: string
           updated_at: string
           user_id: string
@@ -100,6 +142,7 @@ export type Database = {
           height_cm?: number | null
           intensity_level?: string
           membership_tier?: string
+          onboarded_at?: string | null
           preferred_language?: string
           updated_at?: string
           user_id: string
@@ -117,6 +160,7 @@ export type Database = {
           height_cm?: number | null
           intensity_level?: string
           membership_tier?: string
+          onboarded_at?: string | null
           preferred_language?: string
           updated_at?: string
           user_id?: string
@@ -133,6 +177,7 @@ export type Database = {
           discipline: string
           id: string
           language: string
+          level: number
           plan_markdown: string
           started_at: string
           status: string
@@ -140,6 +185,8 @@ export type Database = {
           total_days: number
           updated_at: string
           user_id: string
+          xp: number
+          xp_to_next: number
         }
         Insert: {
           archetype: string
@@ -149,6 +196,7 @@ export type Database = {
           discipline: string
           id?: string
           language?: string
+          level?: number
           plan_markdown: string
           started_at?: string
           status?: string
@@ -156,6 +204,8 @@ export type Database = {
           total_days?: number
           updated_at?: string
           user_id: string
+          xp?: number
+          xp_to_next?: number
         }
         Update: {
           archetype?: string
@@ -165,6 +215,7 @@ export type Database = {
           discipline?: string
           id?: string
           language?: string
+          level?: number
           plan_markdown?: string
           started_at?: string
           status?: string
@@ -172,6 +223,8 @@ export type Database = {
           total_days?: number
           updated_at?: string
           user_id?: string
+          xp?: number
+          xp_to_next?: number
         }
         Relationships: []
       }
