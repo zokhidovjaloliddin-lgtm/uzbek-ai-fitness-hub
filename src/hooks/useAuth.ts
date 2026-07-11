@@ -16,6 +16,7 @@ export type ProfileRow = {
   chosen_character: string | null;
   intensity_level: string | null;
   avatar_url: string | null;
+  onboarded_at: string | null;
 };
 
 export function useAuth() {
