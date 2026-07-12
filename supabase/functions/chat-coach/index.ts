@@ -74,6 +74,7 @@ type Ctx = {
   intensity?: string;
   weight_kg?: number | null;
   height_cm?: number | null;
+  training_focus?: string | null;
 };
 
 function buildSystem(ctx: Ctx) {
@@ -85,13 +86,14 @@ function buildSystem(ctx: Ctx) {
   const height = ctx.height_cm ? `${ctx.height_cm} cm` : "unknown";
   const archetype = ctx.chosen_character || "Default";
   const intensity = (ctx.intensity || "hard").toUpperCase();
+  const focus = ctx.training_focus || "not specified";
   return [
     BASE_PROMPT,
     personaBlock(archetype),
     intensityBlock(ctx.intensity || "hard"),
     languageBlock(lang),
-    `USER PROFILE — name: ${name} | tier: ${tier} | archetype: ${archetype} | BMI: ${bmi} | weight: ${weight} | height: ${height} | intensity: ${intensity}.`,
-    `Tailor every workout, progression scheme, meal plan, and recovery recommendation to these exact live values. Scale difficulty up if INTENSITY is LEVEL_UP. Address the user by name when natural.`,
+    `USER PROFILE — name: ${name} | tier: ${tier} | archetype: ${archetype} | BMI: ${bmi} | weight: ${weight} | height: ${height} | intensity: ${intensity} | training focus: ${focus}.`,
+    `The training focus is what the athlete selected during onboarding (mma, boxing, bodybuilding, calisthenics, other:<label>, or skip). Build the plan around it. If focus is "skip" or "not specified", ask what they want to train for as your FIRST qualifying question. Tailor every workout, progression scheme, meal plan, and recovery recommendation to these exact live values. Scale difficulty up if INTENSITY is LEVEL_UP. Address the user by name when natural.`,
   ].join("\n\n");
 }
 
