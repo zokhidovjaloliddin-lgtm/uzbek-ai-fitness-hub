@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound.tsx";
 import CoachChat from "./pages/CoachChat.tsx";
 import AuthPage from "./pages/Auth.tsx";
 import { LanguageProvider } from "@/lib/i18n";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <LanguageProvider>
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<AuthPage />} />
@@ -25,6 +27,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </ErrorBoundary>
         </LanguageProvider>
       </BrowserRouter>
     </TooltipProvider>

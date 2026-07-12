@@ -19,11 +19,6 @@ const Index = () => {
   const [flashOpen, setFlashOpen] = useState(false);
   const { profile, isAuthed, loading } = useAuth();
   const isGuest = typeof window !== "undefined" && sessionStorage.getItem("guest") === "1";
-
-  // Auth gate — require sign-in unless the user explicitly chose guest.
-  if (!loading && !isAuthed && !isGuest) {
-    return <Navigate to="/auth" replace />;
-  }
   const initialTab: Tab = (() => {
     const p = new URLSearchParams(window.location.search).get("tab");
     if (["home","plans","coach","location","profile"].includes(p ?? "")) return p as Tab;
@@ -98,6 +93,22 @@ const Index = () => {
   useEffect(() => {
     if (!isFreeTier && flashOpen) setFlashOpen(false);
   }, [isFreeTier, flashOpen]);
+
+  // Auth gate — placed AFTER every hook so hook order stays stable across
+  // renders. Returning early above any hook triggers React's
+  // "Rendered fewer hooks than expected" crash → black screen.
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background text-foreground grid place-items-center">
+        <div className="font-mono-tech text-xs uppercase tracking-widest text-crimson/80 animate-pulse">
+          Loading…
+        </div>
+      </div>
+    );
+  }
+  if (!isAuthed && !isGuest) {
+    return <Navigate to="/auth" replace />;
+  }
 
   return (
     <div className={isUltraTier ? "ultra-mode" : ""}>
