@@ -48,9 +48,13 @@ export default function PostSigninOnboarding({
         selected === "other" && otherText.trim()
           ? `other:${otherText.trim().slice(0, 60)}`
           : selected;
-      const update: Record<string, unknown> = {
-        goals: [focusGoal],
-      };
+      const update: {
+        goals: string[];
+        height_cm?: number;
+        weight_kg?: number;
+        bmi?: number;
+        bmi_category?: string;
+      } = { goals: [focusGoal] };
       if (bmi) {
         update.height_cm = h;
         update.weight_kg = w;
