@@ -80,6 +80,7 @@ export default function CoachTab() {
             intensity: profile?.intensity_level ?? "hard",
             weight_kg: profile?.weight_kg ?? null,
             height_cm: profile?.height_cm ?? null,
+            training_focus: profile?.goals?.[0] ?? null,
           },
         },
       });
