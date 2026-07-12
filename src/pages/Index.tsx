@@ -14,6 +14,7 @@ import ProfileTab from "@/pages/tabs/ProfileTab";
 import { useAuth } from "@/hooks/useAuth";
 import { getActiveTier } from "@/lib/storage";
 import { celebrate } from "@/lib/feedback";
+import PostSigninOnboarding from "@/components/onboarding/PostSigninOnboarding";
 
 const Index = () => {
   const [flashOpen, setFlashOpen] = useState(false);
@@ -108,6 +109,19 @@ const Index = () => {
   }
   if (!isAuthed && !isGuest) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Post-signin onboarding: BMI + training focus, before routing to coach.
+  const needsOnboarding =
+    isAuthed &&
+    !!profile &&
+    (!profile.bmi || !profile.goals || profile.goals.length === 0);
+  if (needsOnboarding) {
+    return (
+      <PostSigninOnboarding
+        onDone={() => setTab("coach")}
+      />
+    );
   }
 
   return (
