@@ -28,7 +28,7 @@ export default function PostSigninOnboarding({
 }: {
   onDone: () => void;
 }) {
-  const { user, refreshProfile } = useAuth();
+  const { user } = useAuth();
   const [step, setStep] = useState<"bmi" | "focus">("bmi");
   const [height, setHeight] = useState<string>("");
   const [weight, setWeight] = useState<string>("");
@@ -66,7 +66,6 @@ export default function PostSigninOnboarding({
         .update(update)
         .eq("user_id", user.id);
       if (error) throw error;
-      await refreshProfile();
       toast.success("Profile locked in. Meet your coach.");
       onDone();
     } catch (e) {
