@@ -18,7 +18,8 @@ import PostSigninOnboarding from "@/components/onboarding/PostSigninOnboarding";
 
 const Index = () => {
   const [flashOpen, setFlashOpen] = useState(false);
-  const { profile, isAuthed, loading } = useAuth();
+  const { profile, isAuthed, loading, refreshProfile } = useAuth();
+  const [justOnboarded, setJustOnboarded] = useState(false);
   const isGuest = typeof window !== "undefined" && sessionStorage.getItem("guest") === "1";
   const initialTab: Tab = (() => {
     const p = new URLSearchParams(window.location.search).get("tab");
@@ -115,11 +116,16 @@ const Index = () => {
   const needsOnboarding =
     isAuthed &&
     !!profile &&
+    !justOnboarded &&
     (!profile.bmi || !profile.goals || profile.goals.length === 0);
   if (needsOnboarding) {
     return (
       <PostSigninOnboarding
-        onDone={() => setTab("coach")}
+        onDone={async () => {
+          setJustOnboarded(true);
+          setTab("coach");
+          await refreshProfile();
+        }}
       />
     );
   }
