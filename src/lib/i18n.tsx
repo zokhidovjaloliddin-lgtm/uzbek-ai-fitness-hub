@@ -307,6 +307,84 @@ Object.assign(T, {
   rec_prompts_title: { en: "Recommended prompts", uz: "Tavsiya etilgan savollar", ru: "Рекомендуемые вопросы" },
 });
 
+// Language gate + expanded onboarding + coach greeting keys.
+Object.assign(T, {
+  lg_title: { en: "Choose your language", uz: "Tilingizni tanlang", ru: "Выберите язык" },
+  lg_sub: {
+    en: "Everything in the app will be shown in the language you pick.",
+    uz: "Ilovadagi hamma narsa siz tanlagan tilda ko'rsatiladi.",
+    ru: "Всё в приложении будет отображаться на выбранном вами языке.",
+  },
+  lg_continue: { en: "Continue", uz: "Davom etish", ru: "Продолжить" },
+
+  auth_back: { en: "Back", uz: "Orqaga", ru: "Назад" },
+  auth_guest: { en: "Continue as guest →", uz: "Mehmon sifatida davom etish →", ru: "Продолжить как гость →" },
+  auth_welcome: { en: "Welcome, warrior.", uz: "Xush kelibsiz, sportchi.", ru: "Добро пожаловать, воин." },
+  auth_locked_in: { en: "Locked in.", uz: "Kirdingiz.", ru: "Вы вошли." },
+  auth_failed: { en: "Authentication failed", uz: "Kirish amalga oshmadi", ru: "Ошибка входа" },
+
+  onb_name_title: { en: "Your name and photo", uz: "Ismingiz va rasmingiz", ru: "Ваше имя и фото" },
+  onb_name_sub: {
+    en: "The coach will greet you by name. You can skip and add these later.",
+    uz: "Murabbiy sizni ismingiz bilan chaqiradi. Bularni keyinroq qo'shishingiz mumkin.",
+    ru: "Тренер будет обращаться к вам по имени. Эти данные можно добавить позже.",
+  },
+  onb_name_label: { en: "Display name", uz: "Ismingiz", ru: "Имя" },
+  onb_name_placeholder: { en: "e.g. Aziz", uz: "masalan, Aziz", ru: "например, Азиз" },
+  onb_photo_label: { en: "Profile photo (optional)", uz: "Profil rasmi (ixtiyoriy)", ru: "Фото профиля (по желанию)" },
+  onb_photo_upload: { en: "Upload a photo", uz: "Rasm yuklash", ru: "Загрузить фото" },
+  onb_skip_later: { en: "Skip · I'll add this later", uz: "O'tkazib yuborish · keyinroq qo'shaman", ru: "Пропустить · добавлю позже" },
+  onb_continue: { en: "Continue", uz: "Davom etish", ru: "Продолжить" },
+  onb_back: { en: "← Back", uz: "← Orqaga", ru: "← Назад" },
+  onb_bmi_title: { en: "Your body stats", uz: "Tana ko'rsatkichlari", ru: "Ваши данные" },
+  onb_bmi_sub: {
+    en: "We use this to calibrate the difficulty of your plan.",
+    uz: "Bu ma'lumot reja qiyinligini sozlash uchun ishlatiladi.",
+    ru: "Мы используем эти данные, чтобы настроить сложность плана.",
+  },
+  onb_height: { en: "Height (cm)", uz: "Bo'y (sm)", ru: "Рост (см)" },
+  onb_weight: { en: "Weight (kg)", uz: "Vazn (kg)", ru: "Вес (кг)" },
+  onb_your_bmi: { en: "Your BMI", uz: "Sizning BMI", ru: "Ваш BMI" },
+  onb_focus_title: { en: "What do you train for?", uz: "Nima uchun mashq qilasiz?", ru: "Для чего вы тренируетесь?" },
+  onb_focus_sub: {
+    en: "The coach will build your plan around this focus.",
+    uz: "Murabbiy rejangizni shu yo'nalish bo'yicha tuzadi.",
+    ru: "Тренер построит ваш план вокруг этого направления.",
+  },
+  onb_focus_mma: { en: "MMA", uz: "MMA", ru: "ММА" },
+  onb_focus_boxing: { en: "Boxing", uz: "Boks", ru: "Бокс" },
+  onb_focus_bb: { en: "Bodybuilding", uz: "Bodibilding", ru: "Бодибилдинг" },
+  onb_focus_cali: { en: "Calisthenics", uz: "Kalisteniks", ru: "Калистеника" },
+  onb_focus_other: { en: "Other", uz: "Boshqa", ru: "Другое" },
+  onb_focus_other_ph: { en: "e.g. Powerlifting, Muay Thai…", uz: "masalan, Pauerlifting, Muay Thai…", ru: "например, пауэрлифтинг, муай-тай…" },
+  onb_focus_skip: { en: "Skip · decide later", uz: "O'tkazib yuborish · keyin", ru: "Пропустить · позже" },
+  onb_meet_coach: { en: "Meet the coach", uz: "Murabbiy bilan tanishish", ru: "Встретить тренера" },
+  onb_saving: { en: "Saving…", uz: "Saqlanmoqda…", ru: "Сохранение…" },
+  onb_profile_locked: { en: "Profile saved. Meet your coach.", uz: "Profil saqlandi. Murabbiy bilan tanishing.", ru: "Профиль сохранён. Встречайте тренера." },
+  onb_step_of: { en: "Step {n} of 3", uz: "{n}-qadam / 3", ru: "Шаг {n} из 3" },
+
+  coach_greet_hi: { en: "Hi", uz: "Salom", ru: "Привет" },
+  coach_greet_intro: {
+    en: "I'm your AI Coach. I have your stats and know what you want to train for — I'll build a personalized plan.",
+    uz: "Men sizning AI Murabbiyingizman. Ma'lumotlaringizni va mashq yo'nalishingizni bilaman — sizga shaxsiy reja tuzaman.",
+    ru: "Я ваш AI-тренер. У меня есть ваши данные и цель тренировок — я составлю персональный план.",
+  },
+  coach_your_focus: { en: "Focus", uz: "Yo'nalish", ru: "Направление" },
+  coach_your_bmi: { en: "BMI", uz: "BMI", ru: "BMI" },
+  coach_generate_plan: { en: "Generate my training plan", uz: "Mashg'ulot rejamni yaratish", ru: "Составить мой план тренировок" },
+  coach_chat_placeholder: { en: "Ask the coach…", uz: "Murabbiyga savol bering…", ru: "Спросите тренера…" },
+  coach_guest_placeholder: { en: "Sign in to chat with the coach…", uz: "Murabbiy bilan suhbatlashish uchun kiring…", ru: "Войдите, чтобы общаться с тренером…" },
+  coach_pro_locked_ph: { en: "Pro limit reached — upgrade to Ultra.", uz: "Pro chegara: Ultraga o'ting.", ru: "Лимит Pro исчерпан — перейдите на Ultra." },
+  coach_thinking: { en: "Thinking…", uz: "O'ylanmoqda…", ru: "Думаю…" },
+  coach_loading_history: { en: "Loading history…", uz: "Tarix yuklanmoqda…", ru: "Загрузка истории…" },
+  coach_signin_to_start: { en: "Sign in to start", uz: "Boshlash uchun kiring", ru: "Войдите, чтобы начать" },
+  coach_focus_prompt_prefix: {
+    en: "Please build me a personalized training plan.",
+    uz: "Iltimos, menga shaxsiy mashg'ulot rejasini tuzib bering.",
+    ru: "Пожалуйста, составьте мне персональный план тренировок.",
+  },
+});
+
 type Ctx = {
   lang: Lang;
   setLang: (l: Lang) => void;
