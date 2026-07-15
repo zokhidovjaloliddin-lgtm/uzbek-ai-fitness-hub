@@ -81,6 +81,7 @@ export default function CoachTab() {
             weight_kg: profile?.weight_kg ?? null,
             height_cm: profile?.height_cm ?? null,
             training_focus: profile?.goals?.[0] ?? null,
+            display_name: profile?.display_name ?? null,
           },
         },
       });
@@ -148,7 +149,22 @@ export default function CoachTab() {
             </div>
           )}
           {messages.length === 0 && !loadingHistory && (
-            <EmptyState isGuest={isGuest} onSignIn={() => nav("/auth")} onKick={() => send(kickoff(lang))} />
+            <EmptyState
+              isGuest={isGuest}
+              name={profile?.display_name ?? null}
+              focus={profile?.goals?.[0] ?? null}
+              bmi={profile?.bmi ?? null}
+              bmiCategory={profile?.bmi_category ?? null}
+              lang={lang}
+              tGreetHi={t("coach_greet_hi")}
+              tGreetIntro={t("coach_greet_intro")}
+              tFocus={t("coach_your_focus")}
+              tBmi={t("coach_your_bmi")}
+              tGenerate={t("coach_generate_plan")}
+              tSignIn={t("coach_signin_to_start")}
+              onSignIn={() => nav("/auth")}
+              onKick={() => send(kickoffFor(lang, profile?.display_name, profile?.goals?.[0], profile?.bmi, profile?.bmi_category, t("coach_focus_prompt_prefix")))}
+            />
           )}
           <div className="flex flex-col gap-3">
             {messages.map((m) => (
@@ -232,30 +248,71 @@ export default function CoachTab() {
   );
 }
 
-function kickoff(lang: string) {
-  if (lang === "uz") return "Salom, murabbiy. Menga mos mashg'ulot rejasi tuzib bering. Kerakli savollarni bering.";
-  if (lang === "ru") return "Здравствуй, тренер. Составь мне подходящий тренировочный план. Задай нужные вопросы.";
-  return "Hey coach — I'm ready to train. Please build me a plan; ask whatever you need.";
+function kickoffFor(
+  lang: string,
+  name?: string | null,
+  focus?: string | null,
+  bmi?: number | null,
+  bmiCategory?: string | null,
+  prefix?: string,
+) {
+  const parts: string[] = [];
+  if (prefix) parts.push(prefix);
+  if (name) parts.push(`Name: ${name}.`);
+  if (focus) parts.push(`Training focus: ${focus}.`);
+  if (bmi) parts.push(`BMI: ${bmi}${bmiCategory ? ` (${bmiCategory})` : ""}.`);
+  parts.push("Please respond in my chosen language and address me by name.");
+  return parts.join(" ");
 }
 
-function EmptyState({ isGuest, onSignIn, onKick }: { isGuest: boolean; onSignIn: () => void; onKick: () => void }) {
+function EmptyState(props: {
+  isGuest: boolean;
+  name: string | null;
+  focus: string | null;
+  bmi: number | null;
+  bmiCategory: string | null;
+  lang: string;
+  tGreetHi: string;
+  tGreetIntro: string;
+  tFocus: string;
+  tBmi: string;
+  tGenerate: string;
+  tSignIn: string;
+  onSignIn: () => void;
+  onKick: () => void;
+}) {
+  const { isGuest, name, focus, bmi, bmiCategory, tGreetHi, tGreetIntro, tFocus, tBmi, tGenerate, tSignIn, onSignIn, onKick } = props;
   return (
     <div className="border-frame corner-frame bg-card/60 p-5 text-center">
       <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-full bg-crimson shadow-crimson">
         <Sparkles className="h-5 w-5 text-primary-foreground" />
       </div>
-      <div className="font-display text-2xl tracking-wider">Meet your AI Coach</div>
-      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-        The coach will ask you a few quick questions, then build a personal training plan you can track, level up, and complete.
-      </p>
+      <div className="font-display text-2xl tracking-wider">
+        {tGreetHi}{name ? `, ${name}` : ""}!
+      </div>
+      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{tGreetIntro}</p>
+      {(focus || bmi) && (
+        <div className="mx-auto mt-3 flex max-w-md flex-wrap justify-center gap-2 font-mono-tech text-[10px] uppercase tracking-widest">
+          {focus && (
+            <span className="border border-crimson/40 bg-crimson/10 px-2 py-1 text-crimson">
+              {tFocus}: {focus}
+            </span>
+          )}
+          {bmi && (
+            <span className="border border-border bg-card px-2 py-1 text-muted-foreground">
+              {tBmi}: {bmi}{bmiCategory ? ` · ${bmiCategory}` : ""}
+            </span>
+          )}
+        </div>
+      )}
       <div className="mt-4 flex flex-wrap justify-center gap-2">
         {isGuest ? (
           <button onClick={onSignIn} className="inline-flex items-center gap-2 bg-crimson px-4 py-2 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground">
-            <LogIn className="h-4 w-4" /> Sign in to start
+            <LogIn className="h-4 w-4" /> {tSignIn}
           </button>
         ) : (
           <button onClick={onKick} className="inline-flex items-center gap-2 bg-crimson px-4 py-2 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground">
-            <CheckCircle2 className="h-4 w-4" /> I'm ready to train
+            <CheckCircle2 className="h-4 w-4" /> {tGenerate}
           </button>
         )}
       </div>
