@@ -93,7 +93,7 @@ function buildSystem(ctx: Ctx) {
     intensityBlock(ctx.intensity || "hard"),
     languageBlock(lang),
     `USER PROFILE — name: ${name} | tier: ${tier} | archetype: ${archetype} | BMI: ${bmi} | weight: ${weight} | height: ${height} | intensity: ${intensity} | training focus: ${focus}.`,
-    `The training focus is what the athlete selected during onboarding (mma, boxing, bodybuilding, calisthenics, other:<label>, or skip). Build the plan around it. If focus is "skip" or "not specified", ask what they want to train for as your FIRST qualifying question. Tailor every workout, progression scheme, meal plan, and recovery recommendation to these exact live values. Scale difficulty up if INTENSITY is LEVEL_UP. Address the user by name when natural.`,
+    `ADDRESSING RULE: Always address the athlete by "${name}" in your first sentence and again mid-plan. Reply ONLY in the language specified by the LANGUAGE CONTRACT (${lang}). The training focus (${focus}) is what the athlete selected during onboarding (mma, boxing, bodybuilding, calisthenics, other:<label>, or skip). Build the plan around BMI (${bmi}) and that focus. If focus is "skip" or "not specified", ask what they want to train for as your FIRST qualifying question. Tailor every workout, progression scheme, meal plan, and recovery recommendation to these exact live values. Scale difficulty up if INTENSITY is LEVEL_UP.`,
   ].join("\n\n");
 }
 

@@ -9,8 +9,26 @@ import CoachChat from "./pages/CoachChat.tsx";
 import AuthPage from "./pages/Auth.tsx";
 import { LanguageProvider } from "@/lib/i18n";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import LanguageGate from "@/components/onboarding/LanguageGate";
+import { useLang } from "@/lib/i18n";
 
 const queryClient = new QueryClient();
+
+function AppRoutes() {
+  const { hasChosen } = useLang();
+  if (!hasChosen) return <LanguageGate />;
+  return (
+    <ErrorBoundary>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/coach-chat" element={<CoachChat />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </ErrorBoundary>
+  );
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -19,15 +37,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <LanguageProvider>
-        <ErrorBoundary>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/coach-chat" element={<CoachChat />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        </ErrorBoundary>
+          <AppRoutes />
         </LanguageProvider>
       </BrowserRouter>
     </TooltipProvider>
