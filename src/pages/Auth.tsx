@@ -36,16 +36,16 @@ export default function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast.success("Account forged. Welcome, warrior.");
+        toast.success(t("auth_welcome"));
         nav("/", { replace: true });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Locked in.");
+        toast.success(t("auth_locked_in"));
         nav("/", { replace: true });
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Auth failed";
+      const msg = err instanceof Error ? err.message : t("auth_failed");
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -62,7 +62,7 @@ export default function AuthPage() {
       if (result.redirected) return;
       nav("/", { replace: true });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Google sign-in failed";
+      const msg = err instanceof Error ? err.message : t("auth_failed");
       toast.error(msg);
       setLoading(false);
     }
@@ -72,7 +72,7 @@ export default function AuthPage() {
     <main className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-10">
         <Link to="/" className="inline-flex items-center gap-2 font-mono-tech text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ArrowLeft className="h-4 w-4" /> {t("auth_back")}
         </Link>
 
         <motion.div
@@ -158,7 +158,7 @@ export default function AuthPage() {
               }}
               className="font-mono-tech text-[11px] uppercase tracking-widest text-muted-foreground underline underline-offset-4 hover:text-foreground"
             >
-              Continue as guest →
+              {t("auth_guest")}
             </button>
           </div>
         </motion.div>
