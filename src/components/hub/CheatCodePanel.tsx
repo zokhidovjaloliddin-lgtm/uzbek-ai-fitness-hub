@@ -88,11 +88,11 @@ export default function CheatCodePanel() {
       </AnimatePresence>
       <button
         onClick={() => setOpen((o) => !o)}
-        aria-label="Cheat code menu"
-        className="inline-flex items-center gap-1.5 rounded-full border border-yellow-400/70 bg-black/70 px-3 py-1.5 font-mono-tech text-[10px] uppercase tracking-[0.15em] text-yellow-300 shadow-[0_0_14px_rgba(252,211,77,0.35)] backdrop-blur-md transition hover:bg-yellow-400/10"
+        aria-label="PRO access menu"
+        className="inline-flex items-center gap-1.5 rounded-full border border-crimson/70 bg-black/70 px-3 py-1.5 font-mono-tech text-[10px] uppercase tracking-[0.18em] text-crimson shadow-[0_0_14px_rgba(220,38,38,0.4)] backdrop-blur-md transition hover:bg-crimson/10"
       >
         <Crown className="h-3 w-3" />
-        <span>Cheat</span>
+        <span>PRO</span>
       </button>
     </div>
   );

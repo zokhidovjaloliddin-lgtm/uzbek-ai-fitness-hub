@@ -144,7 +144,7 @@ export default function CoachTab() {
         <div className="container mx-auto max-w-3xl px-4 py-4">
           {loadingHistory && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading history…
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("coach_loading_history")}
             </div>
           )}
           {messages.length === 0 && !loadingHistory && (
@@ -175,7 +175,7 @@ export default function CoachTab() {
                 }>
                   {m.pending ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> Thinking…
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("coach_thinking")}
                     </div>
                   ) : (
                     <div className="prose prose-invert prose-sm max-w-none">
@@ -224,13 +224,13 @@ export default function CoachTab() {
               if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); }
             }}
             rows={1}
-            placeholder={isGuest ? "Sign in to chat with the coach…" : proLocked ? "Pro limit reached — upgrade to Ultra." : "Ask the coach…"}
+            placeholder={isGuest ? t("coach_guest_placeholder") : proLocked ? t("coach_pro_locked_ph") : t("coach_chat_placeholder")}
             disabled={isGuest || proLocked || sending}
             className="min-h-[44px] max-h-40 flex-1 resize-none border border-border bg-background px-3 py-2 font-mono-tech text-sm outline-none focus:border-crimson disabled:opacity-50"
           />
           {isGuest ? (
             <button type="button" onClick={() => nav("/auth")} className="inline-flex items-center gap-1.5 bg-crimson px-4 py-2.5 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground">
-              <LogIn className="h-4 w-4" /> Sign in
+              <LogIn className="h-4 w-4" /> {t("coach_sign_in")}
             </button>
           ) : (
             <button
