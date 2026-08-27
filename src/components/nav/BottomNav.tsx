@@ -24,7 +24,7 @@ export default function BottomNav({ active, onChange }: Props) {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-crimson/40 bg-black/95 backdrop-blur-md"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      <ul className="mx-auto flex max-w-2xl items-stretch justify-between px-2 py-1.5">
+      <ul className="mx-auto flex max-w-2xl items-stretch justify-between px-1.5 py-2">
         {items.map((it) => {
           const on = active === it.id;
           const isCoach = it.id === "coach";
@@ -34,7 +34,7 @@ export default function BottomNav({ active, onChange }: Props) {
                 type="button"
                 onClick={() => onChange(it.id)}
                 aria-current={on ? "page" : undefined}
-                className={`group relative flex w-full flex-col items-center justify-center gap-0.5 rounded-md px-1 py-1.5 transition ${
+                className={`group relative flex w-full flex-col items-center justify-center gap-1 rounded-md px-0.5 py-1 transition ${
                   isCoach
                     ? on
                       ? "text-crimson"
@@ -51,7 +51,7 @@ export default function BottomNav({ active, onChange }: Props) {
                 ) : (
                   <span>{it.icon}</span>
                 )}
-                <span className={`font-mono-tech text-[9px] uppercase tracking-widest ${isCoach ? "-mt-2" : ""}`}>
+                <span className={`font-mono-tech text-[10px] leading-tight uppercase tracking-[0.06em] ${isCoach ? "-mt-2" : ""}`}>
                   {it.label}
                 </span>
                 {on && !isCoach && (

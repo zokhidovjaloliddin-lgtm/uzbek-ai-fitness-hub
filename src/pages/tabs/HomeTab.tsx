@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listPlans, markTodayDone, getStreak, type TrainingPlanRow } from "@/lib/plans";
 import AvatarPicker from "@/components/home/AvatarPicker";
 import PlanCard from "@/components/home/PlanCard";
+import EmptyPlansCard from "@/components/home/EmptyPlansCard";
 import { toast } from "sonner";
 
 export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
@@ -48,6 +49,14 @@ export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
     }
   }
 
+  /** Keep the header compact on mobile: first name only, max 12 chars. */
+  function shortName(v: string) {
+    const base = v.includes("@") ? v.split("@")[0] : v;
+    const first = base.trim().split(/[\s._-]+/)[0] || base;
+    return first.length > 12 ? `${first.slice(0, 12)}…` : first;
+  }
+  const displayName = shortName(profile?.display_name || profile?.email || "Athlete");
+
   const active = plans.filter((p) => p.status === "active");
   const done = plans.filter((p) => p.status === "completed");
 
@@ -68,7 +77,7 @@ export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
             </div>
           ) : (
             <button onClick={() => isAuthed && setEditing(true)} className="mt-1 inline-flex items-center gap-2 font-display text-2xl tracking-wider hover:text-crimson">
-              <span className="truncate">{profile?.display_name || profile?.email?.split("@")[0] || "Athlete"}</span>
+              <span className="max-w-[9rem] truncate sm:max-w-[14rem]">{displayName}</span>
               {isAuthed && <Pencil className="h-3.5 w-3.5 text-muted-foreground" />}
             </button>
           )}
@@ -88,12 +97,7 @@ export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
       <div className="mb-3 font-mono-tech text-[11px] uppercase tracking-widest text-crimson">
         {t("home_active_plans")} · {active.length}
       </div>
-      {active.length === 0 && (
-        <div className="mb-6 border-frame bg-card p-4 text-sm text-muted-foreground">
-          {t("home_no_plans")}{" "}
-          <button onClick={onOpenCoach} className="text-crimson underline underline-offset-4">{t("plans_new")}</button>
-        </div>
-      )}
+      {active.length === 0 && <EmptyPlansCard onCreate={onOpenCoach} />}
       <div className="grid gap-3">
         {active.map((p) => (
           <PlanCard key={p.id} plan={p} onMarkToday={() => onMarkToday(p)} onContinue={onOpenCoach} />
