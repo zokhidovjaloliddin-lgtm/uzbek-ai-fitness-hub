@@ -34,6 +34,7 @@ export default function BottomNav({ active, onChange }: Props) {
                 type="button"
                 onClick={() => onChange(it.id)}
                 aria-current={on ? "page" : undefined}
+                aria-label={it.label}
                 className={`group relative flex w-full flex-col items-center justify-center gap-1 rounded-md px-0.5 py-1 transition ${
                   isCoach
                     ? on

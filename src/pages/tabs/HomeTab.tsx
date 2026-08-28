@@ -8,6 +8,7 @@ import AvatarPicker from "@/components/home/AvatarPicker";
 import PlanCard from "@/components/home/PlanCard";
 import EmptyPlansCard from "@/components/home/EmptyPlansCard";
 import { toast } from "sonner";
+import { isDemoData, demoPlans, DEMO_STREAK, DEMO_EVENT } from "@/lib/demo";
 
 export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
   const { user, profile, isAuthed, refreshProfile } = useAuth();
@@ -19,11 +20,23 @@ export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
 
   useEffect(() => { setName(profile?.display_name ?? ""); }, [profile?.display_name]);
 
+  const [demo, setDemo] = useState(isDemoData());
   useEffect(() => {
+    const sync = () => setDemo(isDemoData());
+    window.addEventListener(DEMO_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(DEMO_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (demo) { setPlans(demoPlans()); setStreak(DEMO_STREAK); return; }
     if (!isAuthed) { setPlans([]); setStreak(0); return; }
     listPlans().then(setPlans).catch(console.error);
     getStreak().then(setStreak).catch(console.error);
-  }, [isAuthed, user?.id]);
+  }, [isAuthed, user?.id, demo]);
 
   async function saveName() {
     if (!user) return;
@@ -41,6 +54,12 @@ export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
   }
 
   async function onMarkToday(p: TrainingPlanRow) {
+    if (demo) {
+      // Demo mode never touches the database — advance the sample row locally.
+      setPlans((cur) => cur.map((x) => x.id === p.id ? { ...x, completed_days: Math.min(x.total_days, x.completed_days + 1) } : x));
+      toast.success(t("home_marked_today"));
+      return;
+    }
     const updated = await markTodayDone(p);
     if (updated) {
       setPlans((cur) => cur.map((x) => (x.id === p.id ? updated : x)));
@@ -55,7 +74,8 @@ export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
     const first = base.trim().split(/[\s._-]+/)[0] || base;
     return first.length > 12 ? `${first.slice(0, 12)}…` : first;
   }
-  const displayName = shortName(profile?.display_name || profile?.email || "Athlete");
+  const fullName = profile?.display_name || profile?.email || "Athlete";
+  const displayName = shortName(fullName);
 
   const active = plans.filter((p) => p.status === "active");
   const done = plans.filter((p) => p.status === "completed");
@@ -76,7 +96,7 @@ export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
               <button onClick={saveName} className="grid h-8 w-8 place-items-center border border-crimson bg-crimson text-primary-foreground"><Check className="h-4 w-4" /></button>
             </div>
           ) : (
-            <button onClick={() => isAuthed && setEditing(true)} className="mt-1 inline-flex items-center gap-2 font-display text-2xl tracking-wider hover:text-crimson">
+            <button onClick={() => isAuthed && setEditing(true)} title={fullName} aria-label={fullName} className="mt-1 inline-flex items-center gap-2 font-display text-2xl tracking-wider hover:text-crimson">
               <span className="max-w-[9rem] truncate sm:max-w-[14rem]">{displayName}</span>
               {isAuthed && <Pencil className="h-3.5 w-3.5 text-muted-foreground" />}
             </button>
@@ -87,6 +107,12 @@ export default function HomeTab({ onOpenCoach }: { onOpenCoach: () => void }) {
         </div>
         <AvatarPicker userId={user?.id ?? null} avatarUrl={profile?.avatar_url ?? null} onChange={saveAvatar} />
       </div>
+
+      {demo && (
+        <div className="mb-4 inline-flex items-center gap-1.5 border border-crimson/40 bg-crimson/10 px-2 py-1 font-mono-tech text-[9px] uppercase tracking-widest text-crimson">
+          {t("demo_badge")}
+        </div>
+      )}
 
       {!isAuthed && (
         <div className="mb-4 border border-yellow-500/40 bg-yellow-500/5 p-3 font-mono-tech text-[11px] text-yellow-200/90">

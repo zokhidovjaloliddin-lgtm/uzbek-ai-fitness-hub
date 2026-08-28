@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Flame, Send, Loader2, Sparkles, LogIn, CheckCircle2, Crown } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import StreamedMarkdown from "@/components/coach/StreamedMarkdown";
+import CoachSkeleton from "@/components/coach/CoachSkeleton";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,7 +10,7 @@ import { getActiveTier } from "@/lib/storage";
 import { celebrate } from "@/lib/feedback";
 import { toast } from "sonner";
 
-type Msg = { id: string; role: "user" | "assistant"; text: string; pending?: boolean };
+type Msg = { id: string; role: "user" | "assistant"; text: string; pending?: boolean; stream?: boolean };
 
 const RECS = ["rec_nutrition","rec_avoid","rec_recovery","rec_scale_up","rec_halal","rec_sleep"] as const;
 
@@ -87,7 +87,7 @@ export default function CoachTab() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       const reply: string = data?.reply ?? "";
-      setMessages((m) => m.map((x) => x.id === pending.id ? { ...x, text: reply, pending: false } : x));
+      setMessages((m) => m.map((x) => x.id === pending.id ? { ...x, text: reply, pending: false, stream: true } : x));
 
       if (data?.plan_created) {
         celebrate();
@@ -174,13 +174,13 @@ export default function CoachTab() {
                     : "max-w-[92%] border border-border bg-card px-3 py-2 text-sm text-foreground"
                 }>
                   {m.pending ? (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("coach_thinking")}
-                    </div>
+                    <CoachSkeleton label={t("coach_building_plan")} />
                   ) : (
-                    <div className="prose prose-invert prose-sm max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
-                    </div>
+                    <StreamedMarkdown
+                      text={m.text}
+                      animate={!!m.stream}
+                      onTick={() => scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight })}
+                    />
                   )}
                 </div>
               </div>
