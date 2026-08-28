@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import AvatarPicker from "@/components/home/AvatarPicker";
+import { Switch } from "@/components/ui/switch";
+import { isDemoData, setDemoData } from "@/lib/demo";
 
 export default function ProfileTab() {
   const { user, profile, isAuthed, refreshProfile } = useAuth();
@@ -13,6 +15,7 @@ export default function ProfileTab() {
   const [name, setName] = useState("");
   const [height, setHeight] = useState<string>("");
   const [weight, setWeight] = useState<string>("");
+  const [demo, setDemo] = useState(isDemoData());
 
   useEffect(() => {
     setName(profile?.display_name ?? "");
@@ -50,7 +53,7 @@ export default function ProfileTab() {
       {!isAuthed && (
         <div className="mt-4 border-frame bg-card p-4">
           <p className="text-sm text-muted-foreground">{t("prof_not_signed_in")}</p>
-          <button onClick={signInGoogle} className="mt-3 inline-flex items-center gap-2 bg-crimson px-4 py-2.5 font-mono-tech text-[11px] uppercase tracking-widest text-primary-foreground">
+          <button onClick={signInGoogle} aria-label="Sign in with Google" className="mt-3 inline-flex items-center gap-2 bg-crimson px-4 py-2.5 font-mono-tech text-[11px] uppercase tracking-widest text-primary-foreground">
             Sign in with Google
           </button>
         </div>
@@ -94,12 +97,29 @@ export default function ProfileTab() {
                 {t("prof_bmi")}: <span className="text-crimson">{profile.bmi}</span> · {profile.bmi_category}
               </div>
             )}
-            <button onClick={save} className="mt-2 inline-flex items-center justify-center gap-2 bg-crimson px-4 py-3 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground">
+            <button onClick={save} aria-label={t("prof_save")} className="mt-2 inline-flex items-center justify-center gap-2 bg-crimson px-4 py-3 font-mono-tech text-xs uppercase tracking-widest text-primary-foreground">
               <Save className="h-4 w-4" /> {t("prof_save")}
             </button>
           </div>
 
-          <button onClick={signOut}
+          {/* Presentation helper: fills the dashboard with sample stats. */}
+          <div className="mt-5 flex items-start gap-4 border-frame bg-card p-4">
+            <div className="min-w-0 flex-1">
+              <div className="font-mono-tech text-[10px] uppercase tracking-widest text-crimson">{t("demo_title")}</div>
+              <p className="mt-1 text-xs text-muted-foreground">{t("demo_desc")}</p>
+            </div>
+            <Switch
+              checked={demo}
+              aria-label={t("demo_title")}
+              onCheckedChange={(v) => {
+                setDemo(v);
+                setDemoData(v);
+                toast.success(v ? t("demo_on") : t("demo_off"));
+              }}
+            />
+          </div>
+
+          <button onClick={signOut} aria-label={t("auth_sign_out")}
             className="mt-5 inline-flex w-full items-center justify-center gap-2 border border-border px-4 py-3 font-mono-tech text-[11px] uppercase tracking-widest text-muted-foreground transition hover:border-crimson hover:text-crimson">
             <LogOut className="h-3.5 w-3.5" /> {t("auth_sign_out")}
           </button>
