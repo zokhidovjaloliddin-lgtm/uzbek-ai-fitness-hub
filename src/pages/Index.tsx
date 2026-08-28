@@ -4,6 +4,7 @@ import Navbar from "@/components/hub/Navbar";
 import FlashDiscount, { hasSeenFlash, markFlashSeen } from "@/components/hub/FlashDiscount";
 import FloatingProBadge from "@/components/hub/FloatingProBadge";
 import CheatCodePanel from "@/components/hub/CheatCodePanel";
+import SocialProofFeed from "@/components/hub/SocialProofFeed";
 import UltraBanner from "@/components/hub/UltraBanner";
 import BottomNav, { type Tab } from "@/components/nav/BottomNav";
 import HomeTab from "@/pages/tabs/HomeTab";
@@ -151,6 +152,7 @@ const Index = () => {
       )}
       <FloatingProBadge visible={isFreeTier} onClick={() => setFlashOpen(true)} />
       <CheatCodePanel />
+      <SocialProofFeed />
       <BottomNav active={tab} onChange={setTab} />
     </div>
   );
