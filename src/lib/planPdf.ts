@@ -133,6 +133,7 @@ export async function exportPlanPdf(plan: TrainingPlanRow, labels: PdfLabels = {
   y += 22;
 
   doc.setFontSize(24);
+  doc.setFont("DejaVu", "bold");
   doc.setTextColor(...WHITE);
   const titleLines = doc.splitTextToSize(plan.title.toUpperCase(), CW);
   doc.text(titleLines, M, y + 14);
@@ -181,6 +182,9 @@ export async function exportPlanPdf(plan: TrainingPlanRow, labels: PdfLabels = {
     }
 
     if (b.kind === "quote") {
+      // Font must be active BEFORE measuring, or jsPDF wraps with stale metrics.
+      doc.setFont("DejaVu", "normal");
+      doc.setFontSize(9.5);
       const lines = doc.splitTextToSize(b.text, CW - 14);
       need(lines.length * 13 + 12);
       doc.setFillColor(...CARD);
@@ -196,6 +200,8 @@ export async function exportPlanPdf(plan: TrainingPlanRow, labels: PdfLabels = {
     }
 
     if (b.kind === "li") {
+      doc.setFont("DejaVu", "normal");
+      doc.setFontSize(9.5);
       const lines = doc.splitTextToSize(b.text, CW - 16);
       need(lines.length * 13 + 4);
       doc.setFillColor(...CRIMSON);
@@ -209,6 +215,8 @@ export async function exportPlanPdf(plan: TrainingPlanRow, labels: PdfLabels = {
     }
 
     if (b.kind === "p") {
+      doc.setFont("DejaVu", "normal");
+      doc.setFontSize(9.5);
       const lines = doc.splitTextToSize(b.text, CW);
       need(lines.length * 13 + 6);
       doc.setFont("DejaVu", "normal");
@@ -261,4 +269,5 @@ export async function exportPlanPdf(plan: TrainingPlanRow, labels: PdfLabels = {
 
   const safe = plan.title.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 60) || "training-plan";
   doc.save(`${safe}.pdf`);
+  return doc;
 }

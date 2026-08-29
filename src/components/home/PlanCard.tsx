@@ -1,6 +1,7 @@
 import { CheckCircle2, Trash2, PlayCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import ProgressRing from "./ProgressRing";
+import PlanExportActions from "./PlanExportActions";
 import { progressPct, type TrainingPlanRow } from "@/lib/plans";
 import { useLang } from "@/lib/i18n";
 
@@ -66,6 +67,7 @@ export default function PlanCard({ plan, onMarkToday, onDelete, onContinue, mark
                 <PlayCircle className="h-3 w-3" /> {t("home_view_details")}
               </button>
             )}
+            <PlanExportActions plan={plan} />
             {onDelete && (
               <button
                 onClick={onDelete}
