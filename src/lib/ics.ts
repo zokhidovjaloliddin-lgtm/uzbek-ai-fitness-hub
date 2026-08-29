@@ -40,7 +40,8 @@ export function parseTrainingDays(markdown: string, fallbackCount = 5): Training
         continue;
       }
     }
-    if (current && line) {
+    // Skip markdown table separator rows ("| --- | --- |") in the event body.
+    if (current && line && !/^\|?[\s:|-]+\|?$/.test(line)) {
       if (current.details.length < 900) {
         current.details += `${line.replace(/\*\*/g, "").replace(/^\|/, "").replace(/\|$/, "").replace(/\s*\|\s*/g, " · ")}\n`;
       }

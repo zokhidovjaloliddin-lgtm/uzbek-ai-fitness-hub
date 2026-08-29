@@ -10,5 +10,7 @@ console.log(buildIcs(plan, days, { time: "07:30", reminderMinutes: 30, durationM
 const fs = await import("node:fs");
 const { default: JsPDF } = await import("jspdf");
 JsPDF.prototype.save = function (name: string) { fs.writeFileSync(`/tmp/${name}`, Buffer.from(this.output("arraybuffer") as ArrayBuffer)); return this; } as any;
-await exportPlanPdf(plan, { brand: "ABSOLUTE FRAME · AI FITNESS HUB", subtitle: "Offline copy of your AI-generated training plan.", footer: "ABSOLUTE FRAME · Jaloliddin Zoxidov · 250040" });
+const doc: any = await exportPlanPdf(plan, { brand: "ABSOLUTE FRAME · AI FITNESS HUB", subtitle: "Offline copy of your AI-generated training plan.", footer: "ABSOLUTE FRAME · Jaloliddin Zoxidov · 250040" });
 console.log("ok");
+fs.writeFileSync("/tmp/qa.pdf", Buffer.from(doc.output("arraybuffer")));
+console.log("saved /tmp/qa.pdf");

@@ -261,4 +261,5 @@ export async function exportPlanPdf(plan: TrainingPlanRow, labels: PdfLabels = {
 
   const safe = plan.title.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 60) || "training-plan";
   doc.save(`${safe}.pdf`);
+  return doc;
 }
