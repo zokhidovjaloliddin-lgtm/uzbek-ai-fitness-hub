@@ -16,7 +16,7 @@ export type TrainingDay = {
 };
 
 const DAY_RE =
-  /^(?:#{1,6}\s*)?(?:\*\*)?\s*(?:(\d{1,2})\s*[-–—]?\s*(?:kun|день|day)|(?:day|kun|день)\s*[-–—:]?\s*(\d{1,2}))\b[:.)-]?\s*(.*)$/i;
+  /^(?:#{1,6}\s*)?(?:\*\*)?\s*(?:(\d{1,2})\s*[-–—]?\s*(?:kun|kuni|день)|(?:day|kun|день)\s*[-–—:]?\s*(\d{1,2}))(?![\d])\s*(.*)$/i;
 
 export function parseTrainingDays(markdown: string, fallbackCount = 5): TrainingDay[] {
   const lines = (markdown ?? "").replace(/\r/g, "").split("\n");
@@ -30,7 +30,12 @@ export function parseTrainingDays(markdown: string, fallbackCount = 5): Training
       const num = Number(m[1] ?? m[2]);
       if (Number.isFinite(num) && num >= 1 && num <= 60) {
         if (current) days.push(current);
-        const label = (m[3] ?? "").replace(/\*+/g, "").replace(/[|#]/g, "").trim();
+        // Drop the leading separator ("Day 1 — Push", "Day 1: Push", "Day 1 - Push").
+        const label = (m[3] ?? "")
+          .replace(/\*+/g, "")
+          .replace(/[|#]/g, "")
+          .replace(/^\s*[-–—:.)]+\s*/, "")
+          .trim();
         current = { index: num, title: label ? `Day ${num} — ${label}` : `Day ${num}`, details: "" };
         continue;
       }
