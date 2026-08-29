@@ -277,6 +277,30 @@ Object.assign(T, {
   plans_status_abandoned: { en: "Archived", uz: "Arxivlangan", ru: "Архив" },
   plans_delete: { en: "Delete plan", uz: "Rejani o'chirish", ru: "Удалить план" },
 
+  // Export: PDF + Calendar
+  exp_pdf: { en: "Download PDF", uz: "PDF yuklab olish", ru: "Скачать PDF" },
+  exp_pdf_working: { en: "Building PDF…", uz: "PDF tayyorlanmoqda…", ru: "Готовим PDF…" },
+  exp_pdf_done: { en: "PDF downloaded", uz: "PDF yuklab olindi", ru: "PDF скачан" },
+  exp_pdf_sub: {
+    en: "Offline copy of your AI-generated training plan.",
+    uz: "AI yaratgan mashg'ulot rejasining oflayn nusxasi.",
+    ru: "Офлайн-копия вашего плана тренировок от ИИ.",
+  },
+  exp_calendar: { en: "Add to calendar", uz: "Kalendarga qo'shish", ru: "В календарь" },
+  exp_cal_title: { en: "Training reminders", uz: "Mashg'ulot eslatmalari", ru: "Напоминания о тренировках" },
+  exp_cal_time: { en: "Session time", uz: "Mashg'ulot vaqti", ru: "Время тренировки" },
+  exp_cal_reminder: { en: "Remind me before", uz: "Oldin eslatish", ru: "Напомнить заранее" },
+  exp_cal_duration: { en: "Duration", uz: "Davomiyligi", ru: "Длительность" },
+  exp_cal_skip_weekends: { en: "Skip weekends", uz: "Dam olish kunlarini o'tkazish", ru: "Пропускать выходные" },
+  exp_cal_days_found: { en: "training days detected", uz: "mashg'ulot kuni topildi", ru: "тренировочных дней найдено" },
+  exp_cal_ics: { en: "Download .ics", uz: ".ics yuklab olish", ru: "Скачать .ics" },
+  exp_cal_google: { en: "Google Calendar", uz: "Google Kalendar", ru: "Google Календарь" },
+  exp_cal_saved: { en: "Calendar file downloaded — open it to add reminders.", uz: "Kalendar fayli yuklab olindi — eslatmalarni qo'shish uchun uni oching.", ru: "Файл календаря скачан — откройте его, чтобы добавить напоминания." },
+  exp_minutes: { en: "min", uz: "daqiqa", ru: "мин" },
+  exp_close: { en: "Close", uz: "Yopish", ru: "Закрыть" },
+
+
+
   // Location tab
   loc_title: { en: "Tashkent Training Locations", uz: "Toshkent Mashg'ulot Manzillari", ru: "Места тренировок в Ташкенте" },
   loc_sub: { en: "Curated gyms, calisthenics parks, and MMA clubs across the city.", uz: "Shahar bo'ylab tanlangan sport zallari, kalisteniks parklari va MMA klublari.", ru: "Отобранные залы, парки калистеники и MMA-клубы по городу." },
